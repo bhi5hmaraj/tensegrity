@@ -1007,6 +1007,9 @@ The system operationalizes learning science principles that have decades of empi
 
 ## References
 
+**Inference Scaling & Timeline Acceleration:**
+- See `docs/design/inference_scaling_and_tensegrity.md` for detailed analysis of how test-time compute, METR half-life model, and multi-agent systems accelerate the governance crisis timeline
+
 **AI Infrastructure & Adoption:**
 - OpenAI. (2025). Announcing The Stargate Project. https://openai.com/index/announcing-the-stargate-project/
 - LinearB. (2024). Is GitHub Copilot worth it? ROI & productivity data. https://linearb.io/blog/is-github-copilot-worth-it

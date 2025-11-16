@@ -598,6 +598,14 @@ Quality governance exists (CI/CD, test coverage tools). Coherence governance exi
 
 ## References and Inspiration
 
+**Inference scaling and timeline acceleration:**
+- See `docs/design/inference_scaling_and_tensegrity.md` for comprehensive analysis of:
+  - METR half-life model (7-month doubling)
+  - Inference scaling vs training scaling
+  - Multi-agent systems (AlphaEvolve, AI co-scientist)
+  - Adversarial optimization lessons from Terence Tao
+  - Accelerated timeline (mainstream adoption Q3 2025, not Q1 2026)
+
 **Learning science:**
 - Justin Skycak's work: https://www.justinmath.com/
 - Math Academy: Active learning platform

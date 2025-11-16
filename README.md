@@ -47,6 +47,8 @@ But faster execution creates new challenges:
 
 **The infrastructure wave:** With Stargate's $500B investment (completion expected end of 2025), agent-scale compute arrives in 12-18 months. Teams without governance infrastructure will drown. Teams with Tensegrity will compound advantages.
 
+**The acceleration:** Recent breakthroughs in inference scaling (test-time compute) and multi-agent systems mean capability jumps happen continuously, not just at model releases. METR research shows agent task horizons doubling every 7 months - by Q4 2025, agents will reliably complete 1-hour expert tasks. Combined with multi-agent architectures (AlphaEvolve, AI co-scientist), this accelerates the timeline by 6 months. Mainstream adoption of multi-agent workflows hits Q3 2025, not Q1 2026. The governance crisis is closer than expected. See [Inference Scaling and Tensegrity](docs/design/inference_scaling_and_tensegrity.md) for detailed analysis.
+
 ---
 
 ## Core Concept: Tensegrity
