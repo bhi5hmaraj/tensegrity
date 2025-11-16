@@ -152,7 +152,13 @@ Human updates mental model, understanding score increases: 80/100
 
 ## Architecture
 
-Tensegrity is built as two layers:
+![Technical Architecture](docs/assets/images/tech-architecture.svg)
+
+**Current status:** PadAI (Layer 1) is implemented and ready to use. Tensegrity (Layer 2) governance features are work in progress.
+
+The diagram shows current implementation (solid lines) and planned features (dashed lines).
+
+Tensegrity is designed as two layers:
 
 ### Layer 1: PadAI (Coordination Infrastructure)
 **Unopinionated multi-agent coordination**
@@ -188,6 +194,8 @@ For detailed architecture diagrams and contracts, see [docs/design/vision_archit
 ---
 
 ## Getting Started
+
+**Try PadAI now!** The coordination layer is fully functional. Install and start coordinating multiple AI agents working on your codebase. Tensegrity governance features will be added in future releases.
 
 ### Prerequisites
 

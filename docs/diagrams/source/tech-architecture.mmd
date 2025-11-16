@@ -1,0 +1,82 @@
+graph TB
+    subgraph Client["Client Layer"]
+        Browser[Web Browser]
+        Frontend[React Frontend<br/>━━━━━<br/>Vite + TypeScript<br/>React Flow visualization<br/>Radix UI components]
+    end
+
+    subgraph Backend["PadAI Server - Coordination Layer (Current MVP)"]
+        API[FastAPI Application<br/>━━━━━<br/>Python 3.10-3.13<br/>CORS enabled<br/>Static file serving]
+
+        Endpoints[REST Endpoints<br/>━━━━━<br/>/api/status<br/>/api/tasks<br/>/api/claim<br/>/api/complete<br/>/api/create<br/>/api/update]
+
+        WSPlanned[WebSocket Server<br/>━━━━━<br/>Real-time updates<br/>PLANNED]
+
+        BeadsWrapper[Beads Wrapper<br/>━━━━━<br/>server/beads.py<br/>Spawns bd CLI subprocess<br/>Parses JSON output]
+    end
+
+    subgraph Storage["Storage Layer"]
+        BeadsMCP[beads-mcp<br/>━━━━━<br/>MCP Server optional<br/>RPC instead of subprocess]
+
+        BeadsFile[.beads/issues.jsonl<br/>━━━━━<br/>Task storage<br/>Dependency graph<br/>Status tracking]
+    end
+
+    subgraph TensegrityPlanned["Tensegrity - Governance Layer (Planned)"]
+        GovEngine[Governance Engine<br/>━━━━━<br/>Invariant enforcement<br/>Equilibrium monitoring<br/>Force tuning]
+
+        Learning[Learning Primitives<br/>━━━━━<br/>Prediction challenges<br/>Comprehension sampling<br/>Knowledge tracking]
+
+        CICD[CI/CD Integration<br/>━━━━━<br/>GitHub Actions<br/>GitLab CI<br/>Test execution]
+    end
+
+    subgraph Agents["Worker Agents"]
+        Agent1[Claude Code]
+        Agent2[Cursor]
+        Agent3[Other AI Agents]
+    end
+
+    subgraph External["External Services"]
+        VCS[Version Control<br/>GitHub/GitLab]
+        Tests[Test Runners<br/>pytest, jest, etc.]
+    end
+
+    Browser -->|HTTP/HTTPS| Frontend
+    Frontend <-->|REST API| Endpoints
+    Frontend -.->|WebSocket planned| WSPlanned
+
+    Endpoints --> API
+    WSPlanned -.-> API
+    API --> BeadsWrapper
+
+    BeadsWrapper -->|Spawns bd CLI| BeadsFile
+    BeadsWrapper -.->|Future: MCP| BeadsMCP
+    BeadsMCP -.->|Read/Write| BeadsFile
+
+    Agent1 -->|HTTP POST/GET| Endpoints
+    Agent2 -->|HTTP POST/GET| Endpoints
+    Agent3 -->|HTTP POST/GET| Endpoints
+
+    API -.->|Future: Events| GovEngine
+    GovEngine -.->|Approve/Block| API
+    GovEngine -.->|Trigger checks| CICD
+    Learning -.->|Challenges| Frontend
+
+    GovEngine -.->|Quality gates| CICD
+    CICD -.->|Test results| GovEngine
+
+    API -->|Merge approved| VCS
+    CICD -->|Run tests| Tests
+
+    style Client fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Backend fill:#e1f5ff,stroke:#1565c0,stroke-width:3px
+    style Storage fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style TensegrityPlanned fill:#fff4e1,stroke:#ef6c00,stroke-width:2px,stroke-dasharray: 5 5
+    style Agents fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style External fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    style Frontend fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style API fill:#bbdefb,stroke:#1565c0,stroke-width:2px
+    style BeadsFile fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style GovEngine fill:#ffecb3,stroke:#ef6c00,stroke-width:2px
+    style WSPlanned fill:#b3e5fc,stroke:#0288d1,stroke-width:1px,stroke-dasharray: 5 5
+    style BeadsMCP fill:#e1bee7,stroke:#7b1fa2,stroke-width:1px,stroke-dasharray: 5 5
+    style Learning fill:#ffe0b2,stroke:#f57c00,stroke-width:2px
