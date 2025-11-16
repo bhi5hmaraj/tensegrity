@@ -1,0 +1,34 @@
+name: Cleanup Preview Service
+
+on:
+  pull_request:
+    types: [closed]
+
+env:
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+
+jobs:
+  cleanup:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup gcloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Delete preview service (ignore if missing)
+        run: |
+          SERVICE="padai-pr-${{ github.event.number }}"
+          gcloud run services delete "$SERVICE" \
+            --region "${{ env.REGION }}" \
+            --platform managed \
+            --quiet || true
+
