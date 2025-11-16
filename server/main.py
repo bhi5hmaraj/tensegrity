@@ -13,7 +13,7 @@ import time
 import logging
 from dotenv import load_dotenv
 
-from beads import (
+from .beads import (
     get_status,
     get_ready_tasks,
     get_all_tasks,

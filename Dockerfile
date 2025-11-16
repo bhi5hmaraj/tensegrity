@@ -23,10 +23,10 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy backend files
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY server/requirements.txt ./server/requirements.txt
+RUN pip install --no-cache-dir -r ./server/requirements.txt
 
-COPY main.py beads.py ./
+COPY server/ ./server/
 
 # Copy Beads workspace (if present) into an internal workspace path
 COPY .beads /workspace/.beads
@@ -49,4 +49,4 @@ urllib.request.urlopen(f'http://localhost:{port}/')
 PY
 
 # Run server
-CMD ["python", "main.py"]
+CMD ["python", "-m", "server.main"]

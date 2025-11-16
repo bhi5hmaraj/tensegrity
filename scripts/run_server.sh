@@ -36,6 +36,5 @@ export PORT
 echo "→ Starting FastAPI on :$PORT (serving /frontend/dist)"
 
 pushd "$ROOT_DIR" >/dev/null
-python main.py
+python -m server.main
 popd >/dev/null
-

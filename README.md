@@ -58,7 +58,7 @@ pip install -r requirements.txt
 ./scripts/run_server.sh
 
 # Option B: Run only API (expects built FE in frontend/dist)
-python main.py
+python -m server.main
 ```
 
 Server runs on http://localhost:8000
@@ -384,7 +384,7 @@ On startup, the server logs the resolved configuration, including the detected `
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "python main.py",
+    "startCommand": "python -m server.main",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
