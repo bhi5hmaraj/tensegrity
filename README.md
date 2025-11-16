@@ -170,11 +170,9 @@ The server auto‑loads `.env.local` (then `.env`) at startup.
 
 ## Deployment (Cloud Run)
 
-This repo includes Terraform and Cloud Build triggers for two branches:
-- `preview` → service `padai-preview`
-- `main` → service `padai`
+Use `scripts/deploy_cloud_run.sh <PROJECT> <REGION> <SERVICE>` for direct gcloud deployment.
 
-See docs/CLOUD_RUN.md and infra/terraform/README.md for full steps.
+Terraform can be added later for team/production scenarios (optional). See docs/CLOUD_RUN.md for details.
 
 ## Docker (local)
 

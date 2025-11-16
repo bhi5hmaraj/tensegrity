@@ -15,12 +15,12 @@ gcloud config set project YOUR_PROJECT_ID
 gcloud config set run/region us-central1
 ```
 
-## Enable required APIs
+## Enable required APIs (handled by script)
 ```bash
 gcloud services enable run.googleapis.com   artifactregistry.googleapis.com   cloudbuild.googleapis.com
 ```
 
-## Create an Artifact Registry repo
+## Artifact Registry (auto-created on first push)
 ```bash
 REGION=us-central1
 REPO=padai
@@ -46,7 +46,7 @@ This uses the Dockerfile to:
 
 Note: Cloud Run instances are ephemeral. Any changes to the database at runtime will not persist across restarts. For durable state, back `/workspace/.beads` with GCS FUSE or move to a managed DB (future work).
 
-## Deploy to Cloud Run
+## Deploy to Cloud Run (via gcloud)
 ```bash
 SERVICE=padai
 
@@ -120,3 +120,7 @@ When Terraform is useful:
 - Repeatable infra across projects/regions
 - Versioned infra, drift detection, and plan reviews
 - Complex IAM and service bindings
+
+
+## Future (Optional): Terraform
+If you later want fully managed, reviewable infrastructure (triggers, registries, IAM), consider adding Terraform back. For now, this project deploys with `gcloud` via `scripts/deploy_cloud_run.sh` to keep things simple for a personal project.
