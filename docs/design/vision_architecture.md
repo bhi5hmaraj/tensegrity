@@ -21,6 +21,153 @@ When 10-20 agents work simultaneously on a codebase:
 
 Large-scale systems already solve this - cities, biological organisms, markets, the Linux kernel. They maintain coherence not through central control, but through **local rules that create global stability**. We need the software equivalent.
 
+## The Economic Foundation: Why Governance Became Expensive
+
+**Understanding the constraint shift through economics reveals why traditional approaches fail at agent scale.**
+
+### The Constraint Has Flipped
+
+In traditional software development, **execution was the bottleneck**. Hiring engineers cost $150K+/year because coding capacity was scarce. Code review was abundant - you could always find time to review the 2-3 PRs that arrived each week.
+
+With AI agents, **governance is the bottleneck**. Agents can write 10-100x more code, but human review capacity hasn't increased. The constraint structure has inverted:
+
+![LP Constraint Shift](../assets/images/economics/lp_constraint_shift.svg)
+*Figure: Before agents, execution constrained everything. After agents, governance constrains everything.*
+
+**Before agents:**
+- Execution capacity: 500 lines/week (tight constraint, zero slack)
+- Governance capacity: 2000 lines/week (loose constraint, lots of slack)
+- **Bottleneck**: How fast can humans write code?
+
+**After agents:**
+- Execution capacity: 50,000 lines/week (loose constraint, massive slack)
+- Governance capacity: 2000 lines/week (tight constraint, zero slack)
+- **Bottleneck**: How fast can humans govern code?
+
+This is a **constraint flip**. What was abundant is now scarce. What was scarce is now abundant.
+
+### Shadow Prices: Investment Priorities Have Inverted
+
+In economics, a **shadow price** tells you the marginal value of relaxing a constraint by one unit. High shadow price = valuable to expand that capacity.
+
+![Shadow Prices](../assets/images/economics/shadow_prices.svg)
+*Figure: Shadow prices show where to invest. Before agents: execution. After agents: governance.*
+
+**Before agents:**
+- Shadow price of execution: $50/hour (hiring engineers very valuable)
+- Shadow price of governance: $2/hour (code review capacity not valuable)
+- **Implication**: Pay high salaries for engineers, treat code review as overhead
+
+**After agents:**
+- Shadow price of execution: $3/hour (adding agent capacity low value)
+- Shadow price of governance: $60/hour (governance capacity very valuable)
+- **Implication**: Hiring more engineers to write code has low ROI. Building governance infrastructure has HIGH ROI.
+
+**This inverts investment priorities.** The traditional advice "hire more engineers to ship faster" no longer works. The bottleneck is governance capacity, not execution capacity. Automating governance is like getting 10x execution capacity back.
+
+### Jevons Paradox: Cheaper Execution → More Code Volume
+
+**The paradox**: When you make something more efficient, total consumption often INCREASES, not decreases.
+
+Classic example: When coal furnaces became more efficient (1800s), total coal usage went UP because cheap coal made it economical to use in more applications.
+
+**Applied to agents:**
+
+![Jevons Paradox](../assets/images/economics/jevons_paradox.svg)
+*Figure: Cheaper execution leads to explosion in code volume. This is Jevons paradox.*
+
+- Cost per line drops 10-100x (agents are cheap)
+- This makes it economical to write WAY more code
+- Code volume INCREASES even as per-line cost decreases
+- Result: More code to review, test, maintain, understand
+
+**The counterintuitive insight**: Cheap execution doesn't reduce governance burden - it INCREASES it. More code = more governance needed.
+
+People expect: "Agents make coding cheaper → less governance needed."
+Reality: "Agents make coding cheaper → MORE code written → MORE governance needed."
+
+### Baumol's Cost Disease: Governance Costs Dominate
+
+**The concept**: When one sector gets much more productive but another doesn't, the low-productivity sector becomes relatively more expensive.
+
+Classic example: Manufacturing productivity increased 10x (automation), but healthcare stayed flat (human-intensive). Result: Healthcare became MUCH more expensive relative to manufactured goods.
+
+**Applied to agents:**
+
+![Baumol Cost Disease](../assets/images/economics/baumol_cost_disease.svg)
+*Figure: Cost structure before vs after agents. Governance goes from 25% to 70% due to Baumol effect.*
+
+- **Execution productivity**: Increased 10-100x (AI agents)
+- **Governance productivity**: Mostly unchanged (still human code review, architecture decisions)
+- **Result**: Governance becomes the dominant cost, even though its absolute effort hasn't changed much
+
+**Before agents:** Execution 60% of costs, Governance 25%
+**After agents:** Execution 15% of costs, Governance 70%
+
+**The insight**: Even if governance effort stays constant, it becomes the DOMINANT cost when execution gets 10x cheaper. Traditional advice to "reduce governance overhead" made sense when execution was 60% of costs. Now governance IS the project. You can't optimize it away - you have to make it productive.
+
+### Combined Crisis: Jevons + Baumol
+
+When these effects combine, you get a governance crisis:
+
+![Combined Effects](../assets/images/economics/combined_effects.svg)
+*Figure: Timeline showing governance burden explosion from combined Jevons and Baumol effects.*
+
+1. **Jevons**: Cheap execution → code volume increases 10x → more governance needed
+2. **Baumol**: Governance productivity unchanged → governance costs dominate
+
+**Timeline:**
+- **2020-2023**: Execution and governance productivity both low, balanced
+- **2024**: AI agents arrive, execution productivity jumps 10x
+- **2025**: Code volume increases (Jevons), governance burden increases (Baumol)
+- **2026**: Governance is the bottleneck, crisis mode
+
+**This is happening NOW, not 5 years out.** Early adopters with 6 months of intensive Claude Code usage are already reporting coordination challenges and mental model degradation.
+
+### How Tensegrity Solves the Economic Problem
+
+Understanding the economics reveals the solution:
+
+**1. Automate Governance to Reverse Baumol Cost Disease**
+
+Governance became expensive because productivity didn't improve. FIX: Improve governance productivity.
+
+- Traditional: Human code review (doesn't scale)
+- Tensegrity: Automated invariant checking, CI/CD integration (DOES scale)
+- **Effect**: Governance productivity increases 10x → costs drop from 70% back to ~30%
+
+**2. Apply Economic Discipline to Combat Jevons**
+
+Volume exploded because execution became cheap. FIX: Add back discipline via governance gates.
+
+- Without gates: Agents write everything because marginal cost ≈ $0
+- With gates: Governance cost per feature is visible, teams optimize for value density
+- **Effect**: Scope force creates back-pressure. Teams write 3x more code (not 10x), but high-value code.
+
+**3. Measure Shadow Prices to Guide Investment**
+
+Shadow prices tell you where to invest:
+
+- High shadow price on learning force? → Invest in active learning primitives
+- High shadow price on coherence? → Invest in architectural constraints
+- Governance constraint loose again? → Relax gates, allow more velocity
+
+**Effect**: Adaptive investment based on where bottlenecks actually are.
+
+**4. Minimize Governance Cost (Not Maximize Governance)**
+
+We're not optimizing governance for its own sake. We're minimizing the cost to achieve software value.
+
+- What's the MINIMUM governance overhead that keeps quality, coherence, learning in bounds?
+- How do we automate the expensive parts (code review, architectural checks)?
+- Where do we need human judgment vs. automated gates?
+
+**Effect**: Minimal effective governance, not maximal governance.
+
+**The synthesis**: Tensegrity solves the economic reality of agent-scale development. Execution is abundant (low shadow price, high slack). Governance is scarce (high shadow price, zero slack). Code volume is exploding (Jevons). Governance costs dominate (Baumol). The solution: Automate governance to match execution productivity, use economic discipline to constrain volume, measure shadow prices to guide investment.
+
+---
+
 ## The Epistemological Problem
 
 But there's a deeper problem that makes agent-scale development fundamentally different from human-scale development: **the knowledge representation gap**.

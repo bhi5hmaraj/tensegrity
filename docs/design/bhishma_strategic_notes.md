@@ -91,6 +91,386 @@ Traditional process (design docs, RFCs, CI) slows things down for small projects
 - **Infrastructure**: WebSockets for real-time comms
 - **UI/UX**: Nudges that guide humans toward maintainable arch choices that work with multiple agents
 
+## Economic Theory: The Constraint Shift
+
+**This section explores the fundamental economics of agent-scale development through the lens of linear programming, shadow prices, and classic economic paradoxes.**
+
+### Why Economics Matters Here
+
+The shift from human-driven to agent-driven development isn't just a technical change - it's an **economic phase transition**. The constraint structure of software development has fundamentally inverted:
+
+- **Before agents**: Execution capacity was scarce and expensive
+- **After agents**: Governance capacity is scarce and expensive
+
+Understanding this through economic theory (linear programming, Jevons paradox, Baumol cost disease) reveals WHY traditional approaches fail at agent scale and HOW Tensegrity addresses the root cause.
+
+### Linear Programming: The Optimization Framework
+
+**Core concept**: Linear programming (LP) finds the optimal solution to maximize/minimize an objective function subject to linear constraints.
+
+**The setup:**
+- **Decision variables**: What we can control (velocity, quality, coherence, learning, scope)
+- **Objective function**: What we want to maximize (software value delivered)
+- **Constraints**: Limits on resources (execution capacity, governance capacity, quality thresholds)
+- **Feasible region**: All solutions that satisfy constraints (a polytope in n-dimensional space)
+- **Optimal solution**: The point in the feasible region that maximizes the objective
+
+**Example for software development:**
+
+```
+Maximize: software_value = f(velocity, quality, coherence, learning, scope)
+
+Subject to:
+  execution_hours ≤ available_human_hours     (execution constraint)
+  governance_hours ≤ review_capacity          (governance constraint)
+  test_coverage ≥ 75%                         (quality constraint)
+  coupling_score ≤ max_coupling               (coherence constraint)
+  velocity + quality ≤ 10                     (tradeoff constraint)
+```
+
+The feasible region is bounded by these constraints. The optimal point lies somewhere on the boundary (typically at a vertex).
+
+### The Simplex Algorithm: Walking Vertices
+
+**How LP solvers find the optimum:**
+
+The simplex algorithm is a vertex-walking method:
+1. Start at an initial vertex (basic feasible solution)
+2. Identify which adjacent vertex improves the objective
+3. Move along an edge to that vertex (pivot operation)
+4. Repeat until no improving direction exists (optimality)
+
+![Simplex Vertex Walk](../assets/images/economics/simplex_vertex_walk.svg)
+*The simplex algorithm walks vertices of the feasible polytope to find equilibrium*
+
+**Mapping to Tensegrity:**
+- Each vertex represents a different force configuration
+- Moving between vertices = adjusting force intensities
+- Optimal vertex = equilibrium state for your context
+- Simplex navigation = how the system searches for stable configuration
+
+**The insight**: Finding equilibrium isn't arbitrary tuning - it's solving an optimization problem with mathematical guarantees.
+
+### Slack Variables: Measuring Unused Capacity
+
+**What is slack?**
+
+In linear programming, **slack variables** measure how much "room" exists in a constraint:
+- If a constraint is `x ≤ 100` and the optimal solution has `x = 70`, the slack is `30`
+- **Slack > 0**: Constraint is loose (not binding)
+- **Slack = 0**: Constraint is tight (binding, limiting the solution)
+
+**Before AI agents: Execution had zero slack**
+
+```
+Execution constraint: code_written ≤ 500 lines/week (human capacity)
+Optimal solution: code_written = 500 lines/week
+Slack in execution constraint: 0 (TIGHT - this limits everything)
+
+Governance constraint: reviewed_code ≤ 2000 lines/week (plenty of capacity)
+Optimal solution: code_written = 500, reviewed = 500
+Slack in governance constraint: 1500 (LOOSE - unused capacity)
+```
+
+The execution constraint had **zero slack** - we maxed out human coding capacity. Governance had **massive slack** - code review capacity was abundant.
+
+**After AI agents: Execution gains slack, governance loses it**
+
+```
+Execution constraint: code_written ≤ 50,000 lines/week (agent capacity)
+Optimal solution: code_written = 2000 lines/week
+Slack in execution constraint: 48,000 (LOOSE - agents can do way more)
+
+Governance constraint: reviewed_code ≤ 2000 lines/week (still human capacity)
+Optimal solution: code_written = 2000, reviewed = 2000
+Slack in governance constraint: 0 (TIGHT - this now limits everything)
+```
+
+Now governance has **zero slack** - we max out review capacity. Execution has **massive slack** - agents could write 25x more code if governance allowed it.
+
+![LP Constraint Shift](../assets/images/economics/lp_constraint_shift.svg)
+*Before agents: execution constraint is tight. After agents: governance constraint is tight.*
+
+**The constraint has FLIPPED.** What was loose is now tight. What was tight is now loose.
+
+### Shadow Prices: What's Worth Relaxing?
+
+**What is a shadow price?**
+
+The **shadow price** (dual value) of a constraint tells you:
+> "How much would the objective function improve if I relaxed this constraint by one unit?"
+
+**Intuition**: If a constraint has high shadow price, that constraint is the bottleneck. Relaxing it (adding more capacity) is valuable.
+
+**Before AI agents:**
+
+```
+Shadow price of execution constraint: $50/hour
+  → Adding one more hour of human coding time is worth $50
+  → This is the bottleneck - very valuable to expand
+
+Shadow price of governance constraint: $2/hour
+  → Adding one more hour of code review time is worth $2
+  → This is NOT the bottleneck - low value to expand
+```
+
+**Economics**: Companies paid high salaries for engineers because execution capacity had high shadow price. Code review was seen as overhead.
+
+**After AI agents:**
+
+```
+Shadow price of execution constraint: $3/hour
+  → Adding more agent execution time is worth $3
+  → Execution is abundant - low marginal value
+
+Shadow price of governance constraint: $60/hour
+  → Adding one more hour of governance capacity is worth $60
+  → Governance is the bottleneck - VERY valuable to expand
+```
+
+![Shadow Prices](../assets/images/economics/shadow_prices.svg)
+*Shadow prices show marginal value of relaxing constraints. The bottleneck has shifted from execution to governance.*
+
+**The insight**: Before agents, you'd pay $50 to add execution capacity and $2 for governance. Now you'd pay $60 for governance capacity and $3 for execution. The economics have inverted.
+
+**What this means practically:**
+- Hiring more engineers to write code has low ROI (execution is abundant)
+- Building governance infrastructure has HIGH ROI (governance is scarce)
+- Automating governance is like getting execution capacity back
+
+### Duality: Two Ways to See the Same Problem
+
+**What is LP duality?**
+
+Every LP problem (primal) has a dual problem. They're mathematically equivalent but view the optimization from opposite perspectives:
+
+- **Primal**: Maximize value given resource constraints
+  - "Given our execution and governance capacity, how much software value can we create?"
+
+- **Dual**: Minimize cost to meet requirements
+  - "What's the minimum cost to achieve our quality, coherence, and velocity targets?"
+
+**The insight**: Shadow prices come from the dual problem. They tell you the "cost" of each constraint.
+
+**Before agents (primal view):**
+```
+Maximize: software_value
+Subject to: execution ≤ 500 hours, governance ≤ 2000 hours
+```
+
+**Before agents (dual view):**
+```
+Minimize: 500 * price_execution + 2000 * price_governance
+Subject to: meeting value targets
+Optimal prices: price_execution = $50, price_governance = $2
+```
+
+Execution is expensive ($50/hour), governance is cheap ($2/hour).
+
+**After agents (dual view):**
+```
+Minimize: 50000 * price_execution + 2000 * price_governance
+Subject to: meeting value targets
+Optimal prices: price_execution = $3, price_governance = $60
+```
+
+Now governance is expensive ($60/hour), execution is cheap ($3/hour).
+
+**The duality insight**:
+- The primal tells us execution was the constraint, now governance is
+- The dual tells us the "shadow cost" structure has inverted
+- We're not optimizing governance for its own sake - we're optimizing the SAME objective (software value), but governance is now the cost driver
+
+### Jevons Paradox: Efficiency Increases Consumption
+
+**The paradox**: Making something more efficient often INCREASES total consumption, not decreases it.
+
+**Classic example**: Coal furnaces became more efficient (1800s), but total coal consumption went UP. Why? Because cheaper coal made it economical to use in more applications.
+
+**Applied to agent coding:**
+
+When AI agents make execution 10-100x more efficient:
+- Cost per line of code drops dramatically
+- But this makes it economical to write WAY more code
+- Total code volume INCREASES even as per-line cost decreases
+
+![Jevons Paradox](../assets/images/economics/jevons_paradox.svg)
+*Cheaper execution leads to more code written, not less. This is Jevons Paradox.*
+
+**Before agents:**
+- Writing 1000 lines costs 10 hours @ $50/hour = $500
+- High cost limits how much code gets written
+- Teams are disciplined about what to build
+
+**After agents:**
+- Writing 1000 lines costs 0.5 hours @ $3/hour = $1.50
+- Low cost removes discipline - agents write everything
+- Code volume explodes: "might as well add this feature too"
+
+**The Jevons insight**: Cheap execution doesn't reduce governance burden - it INCREASES it. More code = more to review, test, maintain, understand.
+
+**This is counterintuitive!** People expect: "Agents make coding cheaper → less governance needed." Reality: "Agents make coding cheaper → MORE code written → MORE governance needed."
+
+### Baumol's Cost Disease: Low-Productivity Sectors Get Expensive
+
+**The concept**: When one sector gets much more productive but another doesn't, the low-productivity sector becomes relatively more expensive.
+
+**Classic example**: Manufacturing productivity increased 10x (automation), but healthcare productivity stayed flat (still human-intensive). Result: Healthcare became MUCH more expensive relative to manufactured goods.
+
+**Applied to agent coding:**
+
+- **Execution productivity**: Increased 10-100x (AI agents)
+- **Governance productivity**: Mostly unchanged (still human-driven review, architecture decisions, understanding)
+
+Result: **Governance becomes the dominant cost**, even though its absolute cost hasn't changed much.
+
+![Baumol Cost Disease](../assets/images/economics/baumol_cost_disease.svg)
+*Cost structure before vs after agents. Governance goes from 25% to 70% of costs due to Baumol effect.*
+
+**Before agents:**
+- Total project cost: $100K
+  - Execution: $60K (60%)
+  - Governance: $25K (25%)
+  - Other: $15K (15%)
+
+**After agents (same total cost):**
+- Total project cost: $100K
+  - Execution: $15K (15%) - 10x productivity gain
+  - Governance: $70K (70%) - same absolute effort, now dominates
+  - Other: $15K (15%)
+
+**The Baumol insight**: Even if governance costs stay constant in absolute terms, they become the DOMINANT cost when execution gets 10x cheaper.
+
+**Why this matters**: Traditional advice ("reduce governance overhead") made sense when execution was 60% of costs. Now governance IS the project. You can't optimize it away - you have to make it productive.
+
+### Combined Effect: The Governance Crisis
+
+**When Jevons + Baumol hit together, you get a crisis:**
+
+1. **Jevons**: Cheap execution → more code volume → more governance needed
+2. **Baumol**: Governance productivity unchanged → governance costs dominate
+
+**The result**: Governance burden explodes.
+
+![Combined Effects Timeline](../assets/images/economics/combined_effects.svg)
+*Combined timeline showing the governance crisis: productivity divergence + volume increase*
+
+**2020-2023**: Execution and governance productivity both low, roughly balanced
+**2024**: AI agents arrive, execution productivity jumps 10x
+**2025**: Code volume increases 10x (Jevons), governance burden increases 10x (Baumol)
+**2026**: Governance is the bottleneck, crisis mode
+
+**The timeline is NOW, not 5 years out.** Early adopters with 6 months of Claude Code usage are already reporting coordination challenges, mental model degradation, inability to track changes across parallel agent work.
+
+### How Tensegrity Solves This: Economic Insights
+
+**Understanding the economics reveals the solution path:**
+
+#### 1. Automate Governance to Match Execution Productivity
+
+**The Baumol solution**: Governance became expensive because its productivity didn't improve. FIX: Improve governance productivity.
+
+- **Traditional governance**: Human code review (doesn't scale)
+- **Tensegrity governance**: Automated invariant checking, CI/CD integration, real-time metrics (DOES scale)
+
+**Effect**: Governance productivity increases 10x → governance costs drop from 70% back to ~30%
+
+This is like automating manufacturing in the 1900s. When the low-productivity sector gets automated, Baumol cost disease reverses.
+
+#### 2. Apply Economic Constraint to Volume (Combat Jevons)
+
+**The Jevons solution**: Volume exploded because execution became cheap. FIX: Add back economic discipline via governance gates.
+
+- **Without gates**: Agents write everything because marginal cost ≈ $0
+- **With gates**: Governance cost per feature is visible, teams optimize for value density
+
+**Effect**: Scope force creates back-pressure. Teams write 3x more code (not 10x), but it's high-value code.
+
+This is like carbon pricing. When there's no cost to emissions, consumption explodes. Add a governance "price" and teams optimize.
+
+#### 3. Use Shadow Prices to Guide Investment
+
+**The LP solution**: Shadow prices tell you where to invest. Before agents: invest in execution. After agents: invest in governance.
+
+- Measure shadow prices across five forces (velocity, quality, coherence, learning, scope)
+- High shadow price on learning force? → Invest in active learning primitives
+- High shadow price on coherence? → Invest in architectural constraints
+- Governance constraint loose again? → Relax gates, allow more velocity
+
+**Effect**: Adaptive investment. Don't guess which governance is valuable - measure shadow prices and optimize.
+
+#### 4. Solve the Dual Problem: Minimize Governance Cost
+
+**The duality insight**: We're not maximizing governance - we're minimizing the cost to achieve software value.
+
+Two approaches:
+- **Approach 1 (primal)**: Maximize software value given execution + governance constraints
+- **Approach 2 (dual)**: Minimize governance cost to achieve value targets
+
+Tensegrity uses the dual framing:
+- What's the MINIMUM governance overhead that keeps quality, coherence, learning in bounds?
+- How do we automate the expensive parts (code review, architectural checks)?
+- Where do we need human judgment vs. automated gates?
+
+**Effect**: Governance is optimized as a COST, not added for its own sake. Minimal effective governance, not maximal governance.
+
+#### 5. Equilibrium as Vertex in Feasible Region
+
+**The simplex insight**: Equilibrium isn't arbitrary - it's the optimal vertex of the feasible polytope.
+
+- Each force (velocity, quality, coherence, learning, scope) is a dimension
+- Constraints define the feasible region
+- Equilibrium = optimal point given your context (startup vs enterprise vs OSS)
+- Tuning forces = moving to a different vertex
+
+**Profiles as different vertices:**
+- **Startup profile**: High velocity, lower quality/coherence (velocity-optimized vertex)
+- **Enterprise profile**: Lower velocity, high quality/coherence (stability-optimized vertex)
+- **OSS profile**: Balanced, high learning (community-optimized vertex)
+
+**Effect**: Switching profiles isn't voodoo - it's solving the LP for a different objective function. Mathematically grounded.
+
+### What We Learned: Key Insights
+
+**From LP theory:**
+- Agent-scale development is an optimization problem with constraints
+- The constraint structure has FLIPPED (execution loose, governance tight)
+- Equilibrium is the optimal vertex, found via simplex-like navigation
+
+**From shadow prices:**
+- Investment priorities have inverted (execution low ROI, governance high ROI)
+- Measure shadow prices across forces to guide where to improve
+- Governance infrastructure has 10x ROI vs. adding more execution capacity
+
+**From Jevons paradox:**
+- Cheap execution → more code volume → more governance needed (not less!)
+- Need scope discipline to prevent unbounded growth
+- The paradox is already happening (early adopters drowning in PRs)
+
+**From Baumol cost disease:**
+- Governance costs dominate when execution productivity jumps
+- Can't optimize governance away - must make it productive
+- Automating governance reverses the cost disease
+
+**From duality:**
+- We're minimizing governance COST to achieve software value
+- Not maximizing governance for its own sake
+- Minimal effective governance, not maximal governance
+
+**The synthesis:**
+
+Tensegrity isn't solving a hypothetical future problem. It's solving the economic reality of agent-scale development:
+- Execution is abundant (low shadow price, high slack)
+- Governance is scarce (high shadow price, zero slack)
+- Code volume is exploding (Jevons)
+- Governance costs dominate (Baumol)
+
+**The solution**: Automate governance to improve its productivity, use economic discipline (scope force) to constrain volume, measure shadow prices to guide investment, solve for minimal effective governance (dual problem).
+
+This is the control system for high-velocity agent development, grounded in economic theory and optimization mathematics.
+
+---
+
 ## The Epistemological Problem
 
 **This is the deeper issue that makes agent-scale fundamentally different from human-scale development.**
