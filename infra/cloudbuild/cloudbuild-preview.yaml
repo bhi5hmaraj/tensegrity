@@ -1,7 +1,7 @@
 substitutions:
   _REGION: us-central1
-  _REPO: padai
-  _SERVICE: padai-preview
+  _REPO: tensegrity
+  _SERVICE: tensegrity-preview
 options:
   logging: CLOUD_LOGGING_ONLY
 steps:

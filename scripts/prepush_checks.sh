@@ -101,6 +101,17 @@ else
   echo "[prepush] ✅ Dockerfile installs from server/requirements.txt"
 fi
 
+# 3b) Enforce single Dockerfile (no drift)
+OTHER_DOCKERS=$(git ls-files | rg '(^|/)[Dd]ockerfile$' | rg -v '^Dockerfile$' || true)
+if [[ -n "$OTHER_DOCKERS" ]]; then
+  echo "[prepush][ERROR] Found additional Dockerfile(s):" >&2
+  echo "$OTHER_DOCKERS" >&2
+  echo "[prepush][HINT] Use the single root Dockerfile only to avoid drift." >&2
+  exit 1
+else
+  echo "[prepush] ✅ Single root Dockerfile enforced"
+fi
+
 # 4) Optional: Docker build smoke test (skippable via --skip-docker flag file)
 if [[ -f "$SKIP_DOCKER_FLAG" ]]; then
   echo "[prepush] (skip) Docker build test disabled via --skip-docker flag"

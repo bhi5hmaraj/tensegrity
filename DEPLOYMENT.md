@@ -1,131 +1,64 @@
-# PadAI Deployment Guide
+# Deployment (single Dockerfile)
 
-## Option 1: Google Cloud Run (Recommended)
+This project uses a single Dockerfile at repo root for everything:
+- Local smoke tests
+- CI/CD builds (GitHub Actions)
+- Cloud Run deployment
 
-See docs/CLOUD_RUN.md for a step-by-step guide using Cloud Build, Artifact Registry, and Cloud Run. The Dockerfile builds the frontend and serves it from FastAPI, honors the `$PORT` variable, and seeds `/workspace/.beads` from the repo at build time.
+See:
+- docs/CLOUD_RUN.md for Cloud Run deploy and CI/CD details
+- scripts/docker_smoke.sh to build and run locally with health checks
 
----
-
-## Option 2: Railway (5 minutes)
-
-Railway provides free hosting perfect for PadAI MVP.
-
-### Steps:
-
-1. **Push to GitHub**
-   ```bash
-   git push origin main
-   ```
-
-2. **Deploy on Railway**
-   - Go to [railway.app](https://railway.app)
-   - Click "New Project" → "Deploy from GitHub repo"
-   - Select `PadAI` repository
-   - Railway auto-detects `server/Dockerfile` and deploys!
-
-3. **Get your URL**
-   - Railway provides: `https://padai-production.up.railway.app`
-   - Test: `curl https://padai-production.up.railway.app/health`
-
-4. **Configure workspace** (Important!)
-   - In Railway dashboard, go to Variables
-   - Add: `WORKSPACE_PATH=/app/workspace`
-   - Upload your `.beads/` folder to Railway (or clone your project repo)
-
-### Cost
-- Free tier: 512MB RAM, $5 credit/month
-- Sufficient for personal use
-
----
-
-## Option 3: Local Development
-
-### Prerequisites
-- Node.js 18+
-- `bd` CLI installed and in PATH
-
-### Run locally:
-
+Quick local test:
 ```bash
-cd server
-
-# Install dependencies
-npm install
-
-# Development mode (auto-reload)
-npm run dev
-
-# Production mode
-npm run build
-npm start
+scripts/docker_smoke.sh           # builds image, runs on :8000, hits /api
+scripts/docker_smoke.sh --keep    # keep container running after checks
 ```
 
-Server runs on `http://localhost:3000`
+Environment:
+- The container exposes 8080 and respects `$PORT` at runtime (Cloud Run default).
+- bd is installed via the official Beads installer; bd is required at runtime.
+- WORKSPACE_PATH defaults to `/workspace` and the Dockerfile copies `.beads` into `/workspace/.beads`.
 
-### Test endpoints:
+No other Dockerfiles or compose files are supported. The pre-push hook enforces a single root Dockerfile to prevent drift.
+
+---
+
+## Cloud Run (Recommended)
+
+See docs/CLOUD_RUN.md for a step-by-step guide using Artifact Registry and Cloud Run. The Dockerfile builds the frontend and serves it from FastAPI, honors `$PORT`, and seeds `/workspace/.beads` during build.
+
+---
+
+## Local Development
+
+To run without Docker during development, use:
 
 ```bash
-# Health check
-curl http://localhost:3000/health
+# Backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r server/requirements.txt
+python -m server.main  # http://localhost:8000
 
-# Get task status
-curl http://localhost:3000/api/status
-
-# Claim a task
-curl -X POST http://localhost:3000/api/claim \
-  -H "Content-Type: application/json" \
-  -d '{"agentName": "test-agent"}'
-
-# Complete a task
-curl -X POST http://localhost:3000/api/complete \
-  -H "Content-Type: application/json" \
-  -d '{"taskId": "padai-2", "notes": "Done!"}'
+# Frontend
+cd frontend && npm install && npm run dev  # http://localhost:3000
 ```
 
 ---
 
-## Option 4: Docker
+## Docker manual
 
-### Build and run:
-
-```bash
-cd server
-
-# Build image
-docker build -t padai-master .
-
-# Run container
-docker run -p 3000:3000 \
-  -v $(pwd)/../.beads:/app/.beads:ro \
-  padai-master
-```
-
-### Or use docker-compose:
+Manual build/run using the single Dockerfile:
 
 ```bash
-cd server
-docker-compose up -d
+docker build -t tensegrity-server .
+docker run -p 8000:8080 tensegrity-server
 ```
 
 ---
 
-## Option 5: Fly.io
-
-```bash
-# Install flyctl
-curl -L https://fly.io/install.sh | sh
-
-# Login
-flyctl auth login
-
-# Launch (from server/ directory)
-flyctl launch
-
-# Deploy
-flyctl deploy
-```
-
-Free tier: 3 shared VMs, auto-scaling
+## Notes
+- No docker-compose variant provided to avoid drift.
 
 ---
 
