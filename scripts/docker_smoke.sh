@@ -85,10 +85,10 @@ done
 
 echo "[smoke] GET /";           curl -fsS "http://localhost:$PORT/" >/dev/null && echo "  → OK" || echo "  → FAIL"
 echo "[smoke] GET /api/health"; curl -fsS "http://localhost:$PORT/api/health" && echo
-echo "[smoke] GET /api/status"; curl -fsS "http://localhost:$PORT/api/status" && echo
-echo "[smoke] GET /api/tasks";  curl -fsS "http://localhost:$PORT/api/tasks" | head -c 300 && echo "..." || echo "  → FAIL"
+echo "[smoke] GET /api/status"; if ! curl -fsS "http://localhost:$PORT/api/status"; then echo; echo "[smoke][ERROR] /api/status failed; tailing logs:"; docker logs "$NAME" | tail -n 200 || true; fi
+echo "[smoke] GET /api/tasks";  if ! curl -fsS "http://localhost:$PORT/api/tasks" | head -c 300; then echo; echo "[smoke][ERROR] /api/tasks failed; tailing logs:"; docker logs "$NAME" | tail -n 200 || true; else echo "..."; fi
 
 echo "[smoke] Recent logs (BD_VERSION, Config):"
-docker logs "$NAME" 2>/dev/null | rg -n "BD_VERSION|Config:|WORKSPACE_PATH|BD_PATH|BEADS_JSONL" || true
+docker logs "$NAME" 2>/dev/null | rg -n "BD_VERSION|Config:|WORKSPACE_PATH|BD_PATH|BEADS_JSONL|bd failed" || true
 
 echo "[smoke] Done."
