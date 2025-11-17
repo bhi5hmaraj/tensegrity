@@ -7,11 +7,11 @@ set -euo pipefail
 # impersonate that service account without JSON keys.
 #
 # Usage (defaults hardcoded for convenience):
-#   scripts/setup_wif.sh [PROJECT_ID] [GITHUB_OWNER/REPO] [POOL_ID=github-pool] [PROVIDER_ID=github] [SA_NAME=padai-deployer]
+#   scripts/setup_wif.sh [PROJECT_ID] [GITHUB_OWNER/REPO] [POOL_ID=github-pool] [PROVIDER_ID=github] [SA_NAME=tensegrity-deployer]
 #
 # Defaults (you can just run the script without args):
 #   PROJECT_ID          = personal-457416
-#   GITHUB_OWNER/REPO   = bhi5hmaraj/tensergrity
+#   GITHUB_OWNER/REPO   = bhi5hmaraj/tensegrity
 #   POOL_ID             = github-pool
 #   PROVIDER_ID         = github
 #   SA_NAME             = tensegrity-deployer
@@ -27,7 +27,7 @@ set -euo pipefail
 
 # Accept args but fall back to hardcoded defaults so you don't have to pass anything.
 PROJECT_ID="${1:-personal-457416}"
-REPO="${2:-bhi5hmaraj/tensergrity}"    # e.g., owner/name
+REPO="${2:-bhi5hmaraj/tensegrity}"    # e.g., owner/name
 POOL_ID="${3:-github-pool}"
 PROVIDER_ID="${4:-github}"
 SA_NAME="${5:-tensegrity-deployer}"
