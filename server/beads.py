@@ -69,6 +69,32 @@ def execute_bd(args: List[str], cwd: str = "/workspace") -> str:
         raise BeadsError("bd command timed out after 10s")
     except FileNotFoundError:
         raise BeadsError("bd CLI not found. Install from https://github.com/steveyegge/beads")
+    except OSError as e:
+        # Common when the downloaded binary is an HTML error page or wrong arch
+        raise BeadsError(f"bd execution failed: {e}")
+
+
+def _read_issues_jsonl(cwd: str = "/workspace") -> List[Dict[str, Any]]:
+    """Fallback reader for .beads/issues.jsonl when bd CLI is unavailable."""
+    logger = logging.getLogger("padai.beads")
+    path = os.path.join(cwd, ".beads", "issues.jsonl")
+    tasks: List[Dict[str, Any]] = []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                    tasks.append(obj)
+                except json.JSONDecodeError:
+                    continue
+        logger.warning("Using JSONL fallback (bd missing/unusable): read %d tasks", len(tasks))
+    except FileNotFoundError:
+        logger.error("JSONL fallback failed: %s not found", path)
+        raise BeadsError("Beads JSONL not found in workspace")
+    return tasks
 
 
 def add_dependency(issue_id: str, depends_on_id: str, dep_type: str = "blocks", cwd: str = "/workspace") -> bool:
@@ -220,32 +246,59 @@ def get_ready_tasks(cwd: str = "/workspace") -> List[Dict[str, Any]]:
 
     Returns list of task dicts with id, title, status, etc.
     """
-    output = execute_bd(["ready"], cwd)
+    try:
+        output = execute_bd(["ready"], cwd)
 
-    tasks: List[Dict[str, Any]] = []
-    for line in output.split('\n'):
-        line = line.strip()
-        # Skip empty lines and headers
-        if not line or line.startswith('📋') or line.startswith('#'):
-            continue
-
-        # Parse format: "1. [P0] padai-10: Deploy to Railway"
-        if '. [P' in line and ':' in line:
-            try:
-                parts = line.split(':', 1)
-                if len(parts) >= 2:
-                    id_part = parts[0].strip()
-                    task_id = id_part.split()[-1]
-                    title = parts[1].strip()
-                    tasks.append({
-                        "id": task_id,
-                        "title": title,
-                        "status": "ready"
-                    })
-            except Exception:
+        tasks: List[Dict[str, Any]] = []
+        for line in output.split('\n'):
+            line = line.strip()
+            # Skip empty lines and headers
+            if not line or line.startswith('📋') or line.startswith('#'):
                 continue
 
-    return tasks
+            # Parse format: "1. [P0] padai-10: Deploy to Railway"
+            if '. [P' in line and ':' in line:
+                try:
+                    parts = line.split(':', 1)
+                    if len(parts) >= 2:
+                        id_part = parts[0].strip()
+                        task_id = id_part.split()[-1]
+                        title = parts[1].strip()
+                        tasks.append({
+                            "id": task_id,
+                            "title": title,
+                            "status": "ready"
+                        })
+                except Exception:
+                    continue
+
+        return tasks
+    except BeadsError:
+        # Fallback: compute from JSONL
+        all_tasks = _read_issues_jsonl(cwd)
+        by_id: Dict[str, Dict[str, Any]] = {t.get('id'): t for t in all_tasks if 'id' in t}
+
+        def is_blocked(task: Dict[str, Any]) -> bool:
+            deps = task.get('dependencies') or []
+            for d in deps:
+                dep_id = d.get('depends_on_id')
+                if not dep_id:
+                    continue
+                dep = by_id.get(dep_id)
+                if dep and dep.get('status') != 'completed':
+                    return True
+            return False
+
+        ready: List[Dict[str, Any]] = []
+        for t in all_tasks:
+            status_t = t.get('status')
+            if status_t in (None, 'open', 'ready') and not is_blocked(t):
+                ready.append({
+                    "id": t.get('id'),
+                    "title": t.get('title'),
+                    "status": "ready"
+                })
+        return ready
 
 
 def get_all_tasks(cwd: str = "/workspace") -> List[Dict[str, Any]]:
@@ -254,19 +307,22 @@ def get_all_tasks(cwd: str = "/workspace") -> List[Dict[str, Any]]:
 
     Returns list of task dicts parsed from JSONL.
     """
-    # Export from DB as JSONL via bd export
-    output = execute_bd(["export"], cwd)
-    tasks: List[Dict[str, Any]] = []
-    for line in output.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            obj = json.loads(line)
-            tasks.append(obj)
-        except json.JSONDecodeError:
-            continue
-    return tasks
+    # Export from DB as JSONL via bd export; fall back to reading JSONL directly
+    try:
+        output = execute_bd(["export"], cwd)
+        tasks: List[Dict[str, Any]] = []
+        for line in output.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+                tasks.append(obj)
+            except json.JSONDecodeError:
+                continue
+        return tasks
+    except BeadsError:
+        return _read_issues_jsonl(cwd)
 
 
 def update_task(
@@ -375,4 +431,3 @@ def complete_task(task_id: str, cwd: str = "/workspace") -> bool:
     """
     # bd uses 'closed' for completed issues
     return update_task(task_id, status="closed", cwd=cwd)
-
