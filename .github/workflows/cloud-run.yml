@@ -2,7 +2,7 @@ name: Deploy to Cloud Run
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, preview ]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -49,7 +49,16 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             SERVICE="padai-pr-${{ github.event.number }}"
           else
-            SERVICE="padai"
+            case "${{ github.ref }}" in
+              refs/heads/main)
+                SERVICE="padai" ;;
+              refs/heads/preview)
+                SERVICE="padai-preview" ;;
+              *)
+                # For other branches, create a branch-named service (sanitized)
+                BR="${{ github.ref }}"; BR=${BR#refs/heads/}; BR=${BR//[^a-zA-Z0-9-]/-}
+                SERVICE="padai-$BR" ;;
+            esac
           fi
           echo "service=$SERVICE" >> $GITHUB_OUTPUT
           SHA=$(git rev-parse --short HEAD)

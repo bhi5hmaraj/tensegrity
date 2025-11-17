@@ -34,13 +34,13 @@ Service account needs roles:
 ## How to use
 
 - Push to `main`
-  - Builds `:REGION-docker.pkg.dev/PROJECT/padai/padai:<ts>-<sha>`
   - Deploys Cloud Run service `padai`
+- Push to `preview`
+  - Deploys Cloud Run service `padai-preview`
 - Open a PR
-  - Builds `:REGION-docker.pkg.dev/PROJECT/padai/padai-pr-<PR>#:<ts>-<sha>`
-  - Deploys service `padai-pr-<PR>#`
+  - Deploys preview service `padai-pr-<PR_NUMBER>`
 - Close the PR
-  - `cloud-run-pr-cleanup.yml` deletes `padai-pr-<PR>#`
+  - `cloud-run-pr-cleanup.yml` deletes `padai-pr-<PR_NUMBER>`
 
 ## Environment Variables
 
