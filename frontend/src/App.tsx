@@ -75,10 +75,8 @@ function App() {
 
   useEffect(() => {
     fetchData()
-
-    // Poll every 5 seconds
-    const interval = setInterval(fetchData, 5000)
-    return () => clearInterval(interval)
+    // Polling disabled - use manual refresh button instead
+    // TODO: Replace with WebSocket/SSE for real-time updates
   }, [])
 
   // Apply theme to body
@@ -140,7 +138,26 @@ function App() {
       <header className="header">
         <Container>
           <Flex align="center" justify="between" wrap="wrap" gap="3">
-            <Heading size="5">PadAI Dashboard</Heading>
+            <Flex align="center" gap="3">
+              <Heading size="5">PadAI Dashboard</Heading>
+              <button
+                onClick={fetchData}
+                disabled={loading}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--controls-border)',
+                  background: 'var(--controls-bg)',
+                  color: 'var(--controls-text)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.5 : 1,
+                  fontSize: '14px'
+                }}
+                title="Refresh data from server"
+              >
+                {loading ? '⏳ Loading...' : '🔄 Refresh'}
+              </button>
+            </Flex>
             <div className="theme-toggle" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <SegmentedControl.Root value={theme} onValueChange={(v) => setTheme(v as any)}>
                 <SegmentedControl.Item value="dark">🌙 Night</SegmentedControl.Item>
