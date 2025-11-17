@@ -177,8 +177,8 @@ Terraform can be added later for team/production scenarios (optional). See docs/
 ## Docker (local)
 
 ```bash
-docker build -t padai-server .
-docker run -p 8000:8000 -v /path/to/workspace:/workspace padai-server
+docker build -t tensegrity-server .
+docker run -p 8000:8000 -v /path/to/workspace:/workspace tensegrity-server
 ```
 
 ## Roadmap

@@ -8,7 +8,7 @@ on:
 
 env:
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
-  REPO: padai
+  REPO: tensegrity
 
 jobs:
   build-and-deploy:
@@ -46,17 +46,17 @@ jobs:
         id: meta
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            SERVICE="padai-pr-${{ github.event.number }}"
+            SERVICE="tensegrity-pr-${{ github.event.number }}"
           else
             case "${{ github.ref }}" in
               refs/heads/main)
-                SERVICE="padai" ;;
+                SERVICE="tensegrity" ;;
               refs/heads/preview)
-                SERVICE="padai-preview" ;;
+                SERVICE="tensegrity-preview" ;;
               *)
                 # For other branches, create a branch-named service (sanitized)
                 BR="${{ github.ref }}"; BR=${BR#refs/heads/}; BR=${BR//[^a-zA-Z0-9-]/-}
-                SERVICE="padai-$BR" ;;
+                SERVICE="tensegrity-$BR" ;;
             esac
           fi
           echo "service=$SERVICE" >> $GITHUB_OUTPUT
@@ -69,7 +69,7 @@ jobs:
           gcloud artifacts repositories create ${{ env.REPO }} \
             --repository-format=docker \
             --location=${{ env.REGION }} \
-            --description="PadAI containers" || true
+            --description="Tensegrity containers" || true
 
       - name: Build and push image
         env:

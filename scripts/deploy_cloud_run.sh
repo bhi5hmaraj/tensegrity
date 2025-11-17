@@ -10,8 +10,8 @@ set -euo pipefail
 #   scripts/deploy_cloud_run.sh <project> <region> <service>
 #
 # Examples:
-#   scripts/deploy_cloud_run.sh my-proj us-central1 padai
-#   scripts/deploy_cloud_run.sh my-proj us-central1 padai-preview
+#   scripts/deploy_cloud_run.sh my-proj us-central1 tensegrity
+#   scripts/deploy_cloud_run.sh my-proj us-central1 tensegrity-preview
 #
 # Optional env:
 #   ENV_VARS   Comma-separated env vars for the service
@@ -38,7 +38,7 @@ for SVC in run.googleapis.com artifactregistry.googleapis.com cloudbuild.googlea
 done
 set -e
 
-REPO="padai"
+REPO="tensegrity"
 IMAGE_PATH="$REGION-docker.pkg.dev/$PROJECT/$REPO/$SERVICE"
 TAG=$(date +%Y%m%d-%H%M%S)
 if git rev-parse --short HEAD >/dev/null 2>&1; then GIT_SHA=$(git rev-parse --short HEAD); TAG="$TAG-$GIT_SHA"; fi

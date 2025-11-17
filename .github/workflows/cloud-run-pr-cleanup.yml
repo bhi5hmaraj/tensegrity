@@ -26,7 +26,7 @@ jobs:
 
       - name: Delete preview service (ignore if missing)
         run: |
-          SERVICE="padai-pr-${{ github.event.number }}"
+          SERVICE="tensegrity-pr-${{ github.event.number }}"
           gcloud run services delete "$SERVICE" \
             --region "${{ env.REGION }}" \
             --platform managed \

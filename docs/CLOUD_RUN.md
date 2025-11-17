@@ -20,20 +20,25 @@ gcloud config set run/region us-central1
 gcloud services enable run.googleapis.com   artifactregistry.googleapis.com   cloudbuild.googleapis.com
 ```
 
+Example for this project:
+```bash
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com --project personal-457416
+```
+
 ## Artifact Registry (auto-created on first push)
 ```bash
 REGION=us-central1
-REPO=padai
+REPO=tensegrity
 PROJECT=$(gcloud config get-value project)
 
-gcloud artifacts repositories create $REPO   --repository-format=docker   --location=$REGION   --description="PadAI containers"
+gcloud artifacts repositories create $REPO   --repository-format=docker   --location=$REGION   --description="Tensegrity containers"
 ```
 
 If the repo already exists, this command will error; that’s fine—continue.
 
 ## Build and push the image (Cloud Build)
 ```bash
-IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/padai:$(date +%Y%m%d-%H%M%S)
+IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/tensegrity:$(date +%Y%m%d-%H%M%S)
 
 gcloud builds submit --tag $IMAGE .
 ```
@@ -52,7 +57,7 @@ This repo includes GitHub Actions workflows that build, push, and deploy on push
 
 ## Deploy to Cloud Run (via gcloud)
 ```bash
-SERVICE=padai
+SERVICE=tensegrity
 
 gcloud run deploy $SERVICE   --image $IMAGE   --allow-unauthenticated   --platform managed   --region $REGION   --set-env-vars WORKSPACE_PATH=/workspace,LOG_LEVEL=INFO
 ```
@@ -77,7 +82,7 @@ If you see `BEADS_JSONL=missing` in logs, ensure your repo’s `.beads/` exists 
 ## Update / Rollback
 ```bash
 # Build a new image
-IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/padai:$(date +%Y%m%d-%H%M%S)
+IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/tensegrity:$(date +%Y%m%d-%H%M%S)
 gcloud builds submit --tag $IMAGE .
 # Deploy new image
 gcloud run deploy $SERVICE --image $IMAGE --region $REGION --platform managed
@@ -102,13 +107,13 @@ If Terraform feels heavy for a personal project, use the provided script:
 ```bash
 scripts/deploy_cloud_run.sh <PROJECT_ID> <REGION> <SERVICE>
 # Example:
-scripts/deploy_cloud_run.sh my-proj us-central1 padai
+scripts/deploy_cloud_run.sh my-proj us-central1 tensegrity
 ```
 
 This will:
 - Enable required APIs
 - Build the container with Cloud Build
-- Push to Artifact Registry (creates `padai` repo on first use)
+- Push to Artifact Registry (creates `tensegrity` repo on first use)
 - Deploy to Cloud Run service `<SERVICE>`
 
 Env vars:
@@ -116,7 +121,7 @@ Env vars:
 
 ```bash
 ENV_VARS="WORKSPACE_PATH=/workspace,LOG_LEVEL=DEBUG" \
-  scripts/deploy_cloud_run.sh my-proj us-central1 padai-preview
+  scripts/deploy_cloud_run.sh my-proj us-central1 tensegrity-preview
 ```
 
 When Terraform is useful:

@@ -5,18 +5,18 @@ This repo ships with GitHub Actions workflows that give a Vercel‑like DX on Go
 ## What it does
 
 - Build container from the repo’s Dockerfile (multi‑stage; builds the frontend and serves it via FastAPI).
-- Push to Artifact Registry (auto‑creates repo `padai` on first run).
+- Push to Artifact Registry (auto‑creates repo `tensegrity` on first run).
 - Deploy to Cloud Run with sensible defaults (env vars, unauthenticated on by default).
-- Preview per PR: service name `padai-pr-<PR_NUMBER>`.
+- Preview per PR: service name `tensegrity-pr-<PR_NUMBER>`.
 - Cleanup job deletes the preview service on PR close.
 
 ## Files
 
 - `.github/workflows/cloud-run.yml`
-  - Push to `main` → deploy `padai`
-  - Pull request → deploy `padai-pr-<PR_NUMBER>`
+  - Push to `main` → deploy `tensegrity`
+  - Pull request → deploy `tensegrity-pr-<PR_NUMBER>`
 - `.github/workflows/cloud-run-pr-cleanup.yml`
-  - Pull request `closed` → delete `padai-pr-<PR_NUMBER>`
+  - Pull request `closed` → delete `tensegrity-pr-<PR_NUMBER>`
 
 ## Required GitHub Secrets
 
@@ -38,13 +38,13 @@ Auth modes supported:
 ## How to use
 
 - Push to `main`
-  - Deploys Cloud Run service `padai`
+- Deploys Cloud Run service `tensegrity`
 - Push to `preview`
-  - Deploys Cloud Run service `padai-preview`
+- Deploys Cloud Run service `tensegrity-preview`
 - Open a PR
-  - Deploys preview service `padai-pr-<PR_NUMBER>`
+- Deploys preview service `tensegrity-pr-<PR_NUMBER>`
 - Close the PR
-  - `cloud-run-pr-cleanup.yml` deletes `padai-pr-<PR_NUMBER>`
+- `cloud-run-pr-cleanup.yml` deletes `tensegrity-pr-<PR_NUMBER>`
 
 ## Environment Variables
 
@@ -59,13 +59,18 @@ To change env vars in deploy step, update:
 
 ## Notes
 
-- Artifact Registry repo `padai` is created on first run if missing.
+- Artifact Registry repo `tensegrity` is created on first run if missing.
 - Cloud Run defaults to port `$PORT` (8080). The server binds to `$PORT` automatically.
 - For persistent Beads data, mount a GCS volume (Cloud Run volumes with GCS FUSE) and set `WORKSPACE_PATH` to that mount path. This workflow doesn’t provision volumes.
 - If you want a PR comment with the service URL, add a step after deploy to call the GitHub API and post the URL.
 
 API enablement:
 - The workflow attempts to enable `run.googleapis.com`, `artifactregistry.googleapis.com`, and `cloudbuild.googleapis.com` as a best‑effort. If the deployer SA lacks permission to enable services, the step will continue with a warning. Ensure these APIs are enabled once by a project Owner.
+
+Example (your project):
+```
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com --project personal-457416
+```
 
 ## Local checks before pushing
 

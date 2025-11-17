@@ -35,6 +35,11 @@ API enablement permission:
   - `artifactregistry.googleapis.com`
   - `cloudbuild.googleapis.com`
 
+Example for this project:
+```
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com --project personal-457416
+```
+
 ## 2) GitHub Actions Secrets
 Add the following repository secrets (Actions):
 - `GCP_PROJECT_ID` = `<PROJECT_ID>`
@@ -47,11 +52,11 @@ Already included in repo:
 - `.github/workflows/cloud-run-pr-cleanup.yml` – cleans up preview service on PR close.
 
 Defaults/behavior:
-- Artifact Registry repo: `padai` (auto-created on first run).
+- Artifact Registry repo: `tensegrity` (auto-created on first run).
 - Service names:
-  - `padai` on `main`
-  - `padai-preview` on `preview`
-  - `padai-pr-<PR>` on pull requests
+  - `tensegrity` on `main`
+  - `tensegrity-preview` on `preview`
+  - `tensegrity-pr-<PR>` on pull requests
 - Env vars at deploy: `WORKSPACE_PATH=/workspace, LOG_LEVEL=INFO`
 
 Optional rename: If you prefer `tensegrity` naming everywhere, update service names and `env.REPO` in the workflows accordingly.
