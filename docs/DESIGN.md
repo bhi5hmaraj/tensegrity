@@ -161,19 +161,21 @@ For future real-time updates without polling, here's a comparison of options:
 
 ### Comparison Table
 
-| Feature | WebSocket (Native) | Server-Sent Events (SSE) | Redis Pub/Sub | Pusher (Managed) | Soketi (Self-hosted) |
-|---------|-------------------|-------------------------|---------------|------------------|---------------------|
-| **Complexity** | Medium | Low | High | Very Low | Low-Medium |
-| **Bidirectional** | ✅ Yes | ❌ No (server→client only) | ✅ Yes (via separate channels) | ✅ Yes | ✅ Yes |
-| **Browser Support** | Excellent (all modern) | Excellent (all modern) | N/A (backend only) | Excellent | Excellent |
-| **Auto-reconnect** | Manual implementation | Built-in | Manual | Built-in | Built-in |
-| **Setup Time** | ~2 hours | ~30 min | ~3 hours | ~15 min | ~1 hour |
-| **Dependencies** | None (native) | None (native) | Redis server | None (cloud) | Node.js server |
-| **Cost (Monthly)** | $0 (included) | $0 (included) | $5-10 (DO/Vultr) | $0-49+ (usage-based) | $5-10 (DO/Vultr) |
-| **Scalability** | Manual (sticky sessions) | Manual | Excellent (Redis cluster) | Automatic | Good (clustering support) |
-| **Python Support** | ✅ FastAPI WebSocket | ✅ sse-starlette | ✅ redis-py | ✅ pusher SDK | ✅ pusher-compatible |
-| **Client Code** | ~20 lines | ~10 lines | N/A | ~5 lines | ~5 lines |
-| **Ideal For** | Chat, gaming | Status updates, logs | Multi-server setups | Quick prototypes | Production without vendor lock |
+| Feature | WebSocket (Native) | Server-Sent Events (SSE) | Redis Pub/Sub (Self-hosted) | Redis Pub/Sub (Upstash) | Pusher (Managed) | Soketi (Self-hosted) |
+|---------|-------------------|-------------------------|----------------------------|------------------------|------------------|---------------------|
+| **Complexity** | Medium | Low | High | Medium | Very Low | Low-Medium |
+| **Bidirectional** | ✅ Yes | ❌ No (server→client only) | ✅ Yes (via separate channels) | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Browser Support** | Excellent (all modern) | Excellent (all modern) | N/A (backend only) | N/A (backend only) | Excellent | Excellent |
+| **Auto-reconnect** | Manual implementation | Built-in | Manual | Manual | Built-in | Built-in |
+| **Setup Time** | ~2 hours | ~30 min | ~3 hours | ~15 min | ~15 min | ~1 hour |
+| **Dependencies** | None (native) | None (native) | Redis server | None (serverless) | None (cloud) | Node.js server |
+| **Cost (Monthly)** | $0 (included) | $0 (included) | $5-10 (DO/Vultr) | $0-8 (usage-based) | $0-49+ (usage-based) | $5-10 (DO/Vultr) |
+| **Free Tier** | ✅ Unlimited | ✅ Unlimited | ❌ None | ✅ 10k commands/day | ✅ 200k msg/day | ❌ None |
+| **Large Payloads** | ✅ Excellent | ⚠️ Good (see notes) | ✅ Excellent | ✅ Excellent | ✅ Excellent | ✅ Excellent |
+| **Scalability** | Manual (sticky sessions) | Manual | Excellent (Redis cluster) | Excellent (global edge) | Automatic | Good (clustering support) |
+| **Python Support** | ✅ FastAPI WebSocket | ✅ sse-starlette | ✅ redis-py | ✅ redis-py + upstash | ✅ pusher SDK | ✅ pusher-compatible |
+| **Client Code** | ~20 lines | ~10 lines | N/A | N/A | ~5 lines | ~5 lines |
+| **Ideal For** | Large graphs, bidirectional | Small-medium updates | Multi-server, large data | Serverless, global edge | Quick prototypes | Production without vendor lock |
 
 ### Detailed Analysis
 
@@ -216,10 +218,78 @@ async def websocket_endpoint(websocket: WebSocket):
 - One-way only (server→client)
 - Connection limit per domain (6 in most browsers)
 - Not suitable for bidirectional needs
+- Large payloads can cause memory pressure (see handling strategies below)
 
 **Best for:** Dashboard status updates, real-time logs, progress tracking
 
 **Implementation estimate:** 30 minutes
+
+**Handling Large Graphs with SSE:**
+
+SSE can handle large payloads, but optimization is recommended:
+
+1. **Differential Updates** (Recommended for large graphs)
+   ```python
+   # Send only changed tasks instead of full graph
+   @app.get("/api/stream")
+   async def stream_updates():
+       last_state = {}
+       async def event_generator():
+           while True:
+               current = {t['id']: t for t in get_all_tasks_fast()}
+
+               # Send only changes
+               added = [t for id, t in current.items() if id not in last_state]
+               updated = [t for id, t in current.items()
+                         if id in last_state and t != last_state[id]]
+               removed = [id for id in last_state if id not in current]
+
+               if added or updated or removed:
+                   yield {
+                       "event": "delta",
+                       "data": json.dumps({
+                           "added": added,
+                           "updated": updated,
+                           "removed": removed
+                       })
+                   }
+
+               last_state = current
+               await asyncio.sleep(2)
+       return EventSourceResponse(event_generator())
+   ```
+
+2. **Compression** - Enable gzip compression in FastAPI/uvicorn
+   ```python
+   # Middleware for response compression
+   from fastapi.middleware.gzip import GZipMiddleware
+   app.add_middleware(GZipMiddleware, minimum_size=1000)
+   ```
+
+3. **Chunked Sending** - For initial load, send in batches
+   ```python
+   # Send full graph in chunks on initial connection
+   yield {"event": "init_start", "data": json.dumps({"total": len(tasks)})}
+   for chunk in chunks(tasks, 100):  # 100 tasks per chunk
+       yield {"event": "init_chunk", "data": json.dumps(chunk)}
+   yield {"event": "init_complete", "data": "{}"}
+   ```
+
+4. **Pagination** - For very large graphs (1000+ tasks)
+   ```python
+   # Client requests specific slice
+   @app.get("/api/stream?offset=0&limit=100")
+   ```
+
+**Size Limits:**
+- SSE has no spec-defined payload limit
+- Practical limits:
+  - **< 100 tasks**: Send full graph each update (simple, works fine)
+  - **100-500 tasks**: Use differential updates
+  - **500-1000 tasks**: Add compression + differential
+  - **1000+ tasks**: Consider WebSocket or pagination
+
+For PadAI's typical use case (< 100 concurrent tasks), **full graph updates work perfectly fine**.
 
 ```python
 # Server (FastAPI + sse-starlette)
@@ -244,7 +314,7 @@ eventSource.onmessage = (event) => {
 };
 ```
 
-#### 3. Redis Pub/Sub
+#### 3. Redis Pub/Sub (Self-hosted)
 
 **Pros:**
 - Excellent for multi-server setups
@@ -255,6 +325,7 @@ eventSource.onmessage = (event) => {
 **Cons:**
 - Requires Redis server ($5-10/mo)
 - Adds architectural complexity
+- Need to manage Redis instance
 - Overkill for single-server MVP
 
 **Best for:** Multi-region deployments, microservices, high-traffic scenarios
@@ -272,7 +343,77 @@ for message in pubsub.listen():
     broadcast_to_websocket_clients(message['data'])
 ```
 
-#### 4. Pusher (Managed Service)
+#### 4. Redis Pub/Sub (Upstash - Managed)
+
+**Pros:**
+- **Serverless** - no infrastructure to manage
+- **Global edge network** - low latency worldwide
+- **Pay-per-use** - only pay for what you use
+- **Generous free tier** - 10,000 commands/day
+- **REST API** - works in serverless environments (Cloud Run, Lambda)
+- Same Redis protocol - drop-in replacement
+
+**Cons:**
+- Costs scale with usage (though cheaper than self-hosted initially)
+- Vendor dependency (but Redis protocol, so portable)
+- Cold starts if using REST API instead of native Redis protocol
+
+**Best for:** Serverless deployments, Cloud Run/Lambda, global applications, MVP→production scaling
+
+**Pricing:**
+- **Free tier:** 10,000 commands/day (~300k commands/month)
+- **Pay-as-you-go:** $0.2 per 100,000 commands
+- **Pro (fixed):** $10/mo for 10M commands
+
+**Comparison to self-hosted:**
+```
+Self-hosted Redis: $5-10/mo fixed + management time
+Upstash:          $0-8/mo based on actual usage + zero management
+
+For PadAI MVP with ~100 tasks, ~10 updates/hour:
+- ~240 pub/sub operations/day
+- ~7,200 operations/month
+- Cost: $0 (within free tier)
+```
+
+**Implementation estimate:** 15 minutes (easier than self-hosted)
+
+```python
+# Using Upstash REST API (works in Cloud Run without persistent connections)
+import httpx
+
+UPSTASH_URL = "https://your-redis.upstash.io"
+UPSTASH_TOKEN = "your-token"
+
+# Worker publishes (HTTP POST instead of Redis connection)
+async def publish_task_update(task):
+    async with httpx.AsyncClient() as client:
+        await client.post(
+            f"{UPSTASH_URL}/publish/task_updates",
+            headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
+            json={"message": json.dumps(task)}
+        )
+
+# Server subscribes via WebSocket
+import websockets
+async def subscribe_upstash():
+    uri = f"wss://your-redis.upstash.io/subscribe/task_updates"
+    async with websockets.connect(uri, extra_headers={
+        "Authorization": f"Bearer {UPSTASH_TOKEN}"
+    }) as ws:
+        async for message in ws:
+            data = json.loads(message)
+            broadcast_to_clients(data)
+```
+
+**Why Upstash for PadAI:**
+- ✅ Perfect for Cloud Run (serverless-friendly)
+- ✅ Free tier covers MVP usage
+- ✅ Scales automatically as you grow
+- ✅ No Redis server to maintain
+- ✅ Global edge = fast updates worldwide
+
+#### 5. Pusher (Managed Service)
 
 **Pros:**
 - Zero infrastructure setup
@@ -309,7 +450,7 @@ const channel = pusher.subscribe('tasks');
 channel.bind('update', (data) => updateUI(data));
 ```
 
-#### 5. Soketi (Self-Hosted Pusher Alternative)
+#### 6. Soketi (Self-Hosted Pusher Alternative)
 
 **Pros:**
 - Pusher-compatible protocol (drop-in replacement)
@@ -347,7 +488,18 @@ const pusher = new Pusher('app-key', {
 });
 ```
 
-### MVP Recommendation: **Server-Sent Events (SSE)**
+### MVP Recommendation: **SSE for small graphs, Upstash + WebSocket for large**
+
+**Decision Matrix:**
+
+| Graph Size | Recommended Approach | Reason |
+|------------|---------------------|---------|
+| **< 100 tasks** | **SSE** (full graph) | Simple, $0, 30min setup, no optimization needed |
+| **100-500 tasks** | **SSE** (differential) | Still cheap, add diff updates (~1hr total) |
+| **500-1000 tasks** | **WebSocket** + compression | Better for frequent large updates |
+| **1000+ tasks** | **Upstash + WebSocket** | Multi-server ready, serverless-friendly |
+
+**Primary Recommendation for PadAI MVP: Server-Sent Events (SSE)**
 
 **Why SSE for MVP:**
 
@@ -355,24 +507,49 @@ const pusher = new Pusher('app-key', {
 2. **Perfect fit for use case** - Dashboard only needs server→client updates
 3. **Built-in reconnection** - Browser handles it automatically
 4. **Zero cost** - No additional infrastructure
-5. **Easy to replace** - Can switch to WebSocket/Soketi later without frontend changes
+5. **Handles typical graphs** - For < 100 tasks, full graph updates work fine
+6. **Easy to replace** - Can switch to WebSocket/Upstash later without major refactor
+
+**Alternative: Upstash + WebSocket (for large graphs or multi-worker)**
+
+If you expect:
+- Large task graphs (500+ tasks)
+- Multiple workers making frequent updates
+- Global deployment with low latency requirements
+
+Then skip SSE and go directly to **Upstash + WebSocket**:
+
+```
+Worker → Upstash Pub/Sub → Server WebSocket → Dashboard
+```
+
+**Pros:**
+- ✅ Free tier covers MVP (10k commands/day)
+- ✅ Serverless-friendly (perfect for Cloud Run)
+- ✅ Handles large payloads without optimization
+- ✅ Decouples workers from server (workers publish to Redis, don't hit server)
+- ✅ Multi-server ready from day one
+
+**Setup time:** ~1 hour (vs 30min for SSE)
 
 **Migration path:**
 ```
-MVP: Manual refresh → SSE (Phase 2) → WebSocket/Soketi (if needed)
+Option A (Simple): Manual refresh → SSE (Phase 2) → WebSocket/Upstash (if needed)
+Option B (Scale-ready): Manual refresh → Upstash + WebSocket (Phase 2)
 ```
 
 **When to upgrade from SSE:**
 
-- **→ WebSocket:** When you need bidirectional (task creation from dashboard)
+- **→ WebSocket:** When you need bidirectional (task creation from dashboard) OR graphs > 500 tasks
+- **→ Upstash:** When you have multiple workers OR need multi-server OR global deployment
 - **→ Soketi:** When you want Pusher-like features without vendor lock-in
-- **→ Redis Pub/Sub:** When you have multiple server instances
+- **→ Pusher:** Quick prototype, willing to pay for convenience
 
 **Implementation priority:**
 
 1. **Now (MVP):** Manual refresh button ✅ **DONE**
-2. **Next (Phase 2):** Add SSE for real-time updates (~30 min)
-3. **Future (Phase 3+):** Consider WebSocket/Soketi if SSE limitations hit
+2. **Next (Phase 2):** Add SSE for real-time updates (~30 min) **OR** Upstash if expecting large scale
+3. **Future (Phase 3+):** Upgrade to WebSocket/Upstash if SSE limitations hit
 
 ### Code Example: SSE Implementation
 
