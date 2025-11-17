@@ -55,6 +55,7 @@ fi
 echo "[smoke] Running container..."
 docker run -d --rm \
   -e LOG_LEVEL=DEBUG \
+  -e PORT=8080 \
   -p "$PORT:8080" \
   --name "$NAME" \
   "$IMAGE" >/dev/null
@@ -91,4 +92,3 @@ echo "[smoke] Recent logs (BD_VERSION, Config):"
 docker logs "$NAME" 2>/dev/null | rg -n "BD_VERSION|Config:|WORKSPACE_PATH|BD_PATH|BEADS_JSONL" || true
 
 echo "[smoke] Done."
-

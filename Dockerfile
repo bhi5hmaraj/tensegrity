@@ -39,13 +39,14 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Set workspace path
 ENV WORKSPACE_PATH=/workspace
+ENV PORT=8080
 
 # Expose default Cloud Run port (honors PORT env variable at runtime)
 EXPOSE 8080
 
 # Health check (simple HTTP GET on root)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD sh -c 'curl -fsS "http://localhost:${PORT:-8080}/" >/dev/null || exit 1'
+  CMD sh -c 'curl -fsS "http://localhost:${PORT}/" >/dev/null || exit 1'
 
 # Run server (exec-form recommended for signal handling)
 CMD ["python", "-m", "server.main"]
