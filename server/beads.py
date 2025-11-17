@@ -43,6 +43,11 @@ def execute_bd(args: List[str], cwd: str = "/workspace") -> str:
         preflags.append("--json")
     if db_path:
         preflags += ["--db", db_path]
+    # Speed/stability flags; can be disabled via env if needed
+    if os.getenv("BD_NO_DAEMON", "1") != "0":
+        preflags.append("--no-daemon")
+    if os.getenv("BD_NO_AUTO_IMPORT", "1") != "0":
+        preflags.append("--no-auto-import")
 
     cmd = ["bd", *preflags, *args_no_json]
     logger = logging.getLogger("padai.beads")
@@ -54,7 +59,7 @@ def execute_bd(args: List[str], cwd: str = "/workspace") -> str:
             cwd=cwd,
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=int(os.getenv("BD_TIMEOUT_SECS", "30"))
         )
 
         if result.returncode != 0:
@@ -66,7 +71,7 @@ def execute_bd(args: List[str], cwd: str = "/workspace") -> str:
         return out
 
     except subprocess.TimeoutExpired:
-        raise BeadsError("bd command timed out after 10s")
+        raise BeadsError(f"bd command timed out after {os.getenv('BD_TIMEOUT_SECS','30')}s")
     except FileNotFoundError:
         raise BeadsError("bd CLI not found. Install from https://github.com/steveyegge/beads")
     except OSError as e:
