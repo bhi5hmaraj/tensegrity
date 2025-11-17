@@ -40,13 +40,9 @@ ENV WORKSPACE_PATH=/workspace
 # Expose default Cloud Run port (honors PORT env variable at runtime)
 EXPOSE 8080
 
-# Health check
+# Health check (simple HTTP GET on root)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD python - <<'PY' || exit 1
-import os, urllib.request
-port = os.getenv('PORT', '8080')
-urllib.request.urlopen(f'http://localhost:{port}/')
-PY
+  CMD sh -c 'curl -fsS "http://localhost:${PORT:-8080}/" >/dev/null || exit 1'
 
 # Run server (shell form for prepush check compatibility)
 CMD python -m server.main
