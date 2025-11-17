@@ -20,12 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup gcloud auth (OIDC)
+      - name: Setup gcloud auth (SA JSON)
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-          token_format: access_token
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Setup gcloud SDK
         uses: google-github-actions/setup-gcloud@v2

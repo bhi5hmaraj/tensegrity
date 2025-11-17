@@ -6,18 +6,18 @@ echo "[prepush] Running PadAI/Tensegrity pre-push checks..."
 ROOT_DIR=$(git rev-parse --show-toplevel)
 cd "$ROOT_DIR"
 
-# 1) Ensure workflows use OIDC (WIF), not JSON keys
-if rg -n "credentials_json\s*:" .github/workflows 2>/dev/null | sed -n '1,3p'; then
-  echo "[prepush][ERROR] Found credentials_json in workflows. Switch to OIDC (Workload Identity Federation)." >&2
-  exit 1
+# 1) Detect auth mode used by workflows
+if rg -n "credentials_json\s*:" .github/workflows >/dev/null 2>&1; then
+  AUTH_MODE="SA"
+  echo "[prepush] 🔐 Workflows use Service Account JSON auth (credentials_json)"
 else
-  echo "[prepush] ✅ Workflows do not reference credentials_json"
-fi
-
-if ! rg -n "workload_identity_provider\s*:" .github/workflows >/dev/null 2>&1; then
-  echo "[prepush][WARN] Workflows do not contain workload_identity_provider. Ensure OIDC auth is configured."
-else
-  echo "[prepush] ✅ Workflows contain workload_identity_provider"
+  AUTH_MODE="WIF"
+  echo "[prepush] 🔑 Workflows use OIDC (WIF) auth"
+  if ! rg -n "workload_identity_provider\s*:" .github/workflows >/dev/null 2>&1; then
+    echo "[prepush][WARN] Workflows do not contain workload_identity_provider. Ensure OIDC auth is configured."
+  else
+    echo "[prepush] ✅ Workflows contain workload_identity_provider"
+  fi
 fi
 
 # 2) Optional GCP checks if gcloud is available
@@ -28,42 +28,54 @@ if command -v gcloud >/dev/null 2>&1; then
   SA_NAME=${GCP_DEPLOY_SA_NAME:-tensegrity-deployer}
   REPO_SLUG=${GITHUB_REPO_SLUG:-bhi5hmaraj/tensegrity}
 
-  echo "[prepush] gcloud present; validating WIF provider and SA in project '$PROJECT_ID'"
+  if [[ "$AUTH_MODE" == "WIF" ]]; then
+    echo "[prepush] gcloud present; validating WIF provider and SA in project '$PROJECT_ID'"
 
-  set +e
-  COND=$(gcloud iam workload-identity-pools providers describe "$PROVIDER_ID" \
-    --project "$PROJECT_ID" --location global --workload-identity-pool "$POOL_ID" \
-    --format='value(oidc.attributeCondition)' 2>/dev/null)
-  RC=$?
-  set -e
+    set +e
+    COND=$(gcloud iam workload-identity-pools providers describe "$PROVIDER_ID" \
+      --project "$PROJECT_ID" --location global --workload-identity-pool "$POOL_ID" \
+      --format='value(oidc.attributeCondition)' 2>/dev/null)
+    RC=$?
+    set -e
 
-  if [[ $RC -ne 0 || -z "$COND" ]]; then
-    echo "[prepush][WARN] Could not read provider condition for $POOL_ID/$PROVIDER_ID in $PROJECT_ID. Ensure WIF is set up."
-  else
-    echo "[prepush] Provider condition: $COND"
-    if [[ "$COND" != *"attribute.repository=='$REPO_SLUG'"* ]]; then
-      echo "[prepush][ERROR] Provider condition does not match repo '$REPO_SLUG'" >&2
-      exit 1
+    if [[ $RC -ne 0 || -z "$COND" ]]; then
+      echo "[prepush][WARN] Could not read provider condition for $POOL_ID/$PROVIDER_ID in $PROJECT_ID. Ensure WIF is set up."
     else
-      echo "[prepush] ✅ Provider condition trusts $REPO_SLUG"
+      echo "[prepush] Provider condition: $COND"
+      if [[ "$COND" != *"attribute.repository=='$REPO_SLUG'"* ]]; then
+        echo "[prepush][ERROR] Provider condition does not match repo '$REPO_SLUG'" >&2
+        exit 1
+      else
+        echo "[prepush] ✅ Provider condition trusts $REPO_SLUG"
+      fi
     fi
-  fi
 
-  SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-  if gcloud iam service-accounts describe "$SA_EMAIL" --project "$PROJECT_ID" >/dev/null 2>&1; then
-    echo "[prepush] ✅ Service Account exists: $SA_EMAIL"
-  else
-    echo "[prepush][ERROR] Missing Service Account: $SA_EMAIL" >&2
-    exit 1
-  fi
+    SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+    if gcloud iam service-accounts describe "$SA_EMAIL" --project "$PROJECT_ID" >/dev/null 2>&1; then
+      echo "[prepush] ✅ Service Account exists: $SA_EMAIL"
+    else
+      echo "[prepush][ERROR] Missing Service Account: $SA_EMAIL" >&2
+      exit 1
+    fi
 
-  # Check WIF binding
-  POLICY=$(gcloud iam service-accounts get-iam-policy "$SA_EMAIL" --project "$PROJECT_ID" --format=json)
-  if echo "$POLICY" | rg -q "roles/iam.workloadIdentityUser" && echo "$POLICY" | rg -q "$REPO_SLUG"; then
-    echo "[prepush] ✅ WorkloadIdentityUser binding present for $REPO_SLUG"
+    # Check WIF binding
+    POLICY=$(gcloud iam service-accounts get-iam-policy "$SA_EMAIL" --project "$PROJECT_ID" --format=json)
+    if echo "$POLICY" | rg -q "roles/iam.workloadIdentityUser" && echo "$POLICY" | rg -q "$REPO_SLUG"; then
+      echo "[prepush] ✅ WorkloadIdentityUser binding present for $REPO_SLUG"
+    else
+      echo "[prepush][ERROR] WorkloadIdentityUser binding missing for $REPO_SLUG on $SA_EMAIL" >&2
+      exit 1
+    fi
   else
-    echo "[prepush][ERROR] WorkloadIdentityUser binding missing for $REPO_SLUG on $SA_EMAIL" >&2
-    exit 1
+    echo "[prepush] gcloud present; validating Service Account existence in project '$PROJECT_ID'"
+    SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+    if gcloud iam service-accounts describe "$SA_EMAIL" --project "$PROJECT_ID" >/dev/null 2>&1; then
+      echo "[prepush] ✅ Service Account exists: $SA_EMAIL"
+    else
+      echo "[prepush][ERROR] Missing Service Account: $SA_EMAIL" >&2
+      exit 1
+    fi
+    echo "[prepush] (SA mode) Skipping WIF provider and binding checks"
   fi
 else
   echo "[prepush] (gcloud not found) Skipping GCP validation."
