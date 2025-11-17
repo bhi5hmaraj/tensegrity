@@ -7,7 +7,7 @@ set -euo pipefail
 # - Deploys to Cloud Run service
 #
 # Usage:
-#   scripts/deploy_cloud_run.sh <project> <region> <service>
+#   scripts/deploy_cloud_run.sh [-d|--debug] <project> <region> <service>
 #
 # Examples:
 #   scripts/deploy_cloud_run.sh my-proj us-central1 tensegrity
@@ -17,23 +17,38 @@ set -euo pipefail
 #   ENV_VARS   Comma-separated env vars for the service
 #              (default: WORKSPACE_PATH=/workspace,LOG_LEVEL=INFO)
 
-if [[ $# -lt 3 ]]; then
-  echo "Usage: $0 <project> <region> <service>" >&2
+DEBUG=0
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -d|--debug) DEBUG=1; shift ;;
+    *) ARGS+=("$1"); shift ;;
+  esac
+done
+
+if [[ ${#ARGS[@]} -lt 3 ]]; then
+  echo "Usage: $0 [-d|--debug] <project> <region> <service>" >&2
   exit 2
 fi
 
-PROJECT="$1"
-REGION="$2"
-SERVICE="$3"
+PROJECT="${ARGS[0]}"
+REGION="${ARGS[1]}"
+SERVICE="${ARGS[2]}"
 
 ENV_VARS="${ENV_VARS:-WORKSPACE_PATH=/workspace,LOG_LEVEL=INFO}"
 
-echo "→ Project: $PROJECT  Region: $REGION  Service: $SERVICE"
+if [[ $DEBUG -eq 1 ]]; then
+  set -x
+  export CLOUDSDK_CORE_VERBOSITY=debug
+  export CLOUDSDK_CORE_LOG_HTTP=true
+fi
+
+echo "→ Project: $PROJECT  Region: $REGION  Service: $SERVICE  Debug: $DEBUG"
 
 echo "→ Ensuring required APIs (best-effort)"
 set +e
 for SVC in run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com; do
-  gcloud services enable "$SVC" --project "$PROJECT" >/dev/null \
+  gcloud services enable "$SVC" --project "$PROJECT" \
     || echo "WARN: could not enable $SVC (missing permission or already enabled)"
 done
 set -e

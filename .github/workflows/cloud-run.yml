@@ -9,6 +9,8 @@ on:
 env:
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
   REPO: tensegrity
+  CLOUDSDK_CORE_VERBOSITY: debug
+  CLOUDSDK_CORE_LOG_HTTP: 'true'
 
 jobs:
   build-and-deploy:
@@ -31,16 +33,38 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           install_components: 'beta'
 
+      - name: Debug gcloud context
+        run: |
+          set -x
+          which gcloud
+          gcloud --version
+          gcloud info
+          gcloud config list
+          gcloud auth list
+          echo "PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}"
+          echo "REGION=${{ env.REGION }}"
+          echo "REPO=${{ env.REPO }}"
+
       - name: Ensure required APIs (best-effort)
         run: |
+          set -x
           set +e
           for SVC in run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com; do
-            gcloud services enable "$SVC" || echo "WARN: could not enable $SVC (likely missing permission or already enabled)"
+            gcloud services enable "$SVC" --verbosity=debug --log-http || echo "WARN: could not enable $SVC (likely missing permission or already enabled)"
           done
           set -e
 
+      - name: Debug enabled services and AR repos
+        run: |
+          set -x
+          gcloud services list --enabled
+          gcloud artifacts repositories list --location=${{ env.REGION }} || true
+          gcloud run services list --region=${{ env.REGION }} || true
+
       - name: Configure Docker auth for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+        run: |
+          set -x
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Determine service name and image tag
         id: meta
@@ -63,20 +87,35 @@ jobs:
           SHA=$(git rev-parse --short HEAD)
           TS=$(date +%Y%m%d-%H%M%S)
           echo "tag=$TS-$SHA" >> $GITHUB_OUTPUT
+          echo "Using service=$SERVICE tag=$TS-$SHA"
 
       - name: Create Artifact Registry repo if missing (ignore error)
         run: |
+          set -x
           gcloud artifacts repositories create ${{ env.REPO }} \
             --repository-format=docker \
             --location=${{ env.REGION }} \
             --description="Tensegrity containers" || true
 
+      - name: Verify Artifact Registry repo exists
+        run: |
+          set -x
+          if ! gcloud artifacts repositories describe ${{ env.REPO }} --location=${{ env.REGION }} >/dev/null 2>&1; then
+            echo "::error::Artifact Registry repo '${{ env.REPO }}' not found in region '${{ env.REGION }}'." 
+            echo "::error::As a project Owner, run: gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com --project ${{ secrets.GCP_PROJECT_ID }}"
+            echo "::error::Then create the repo: gcloud artifacts repositories create ${{ env.REPO }} --repository-format=docker --location=${{ env.REGION }} --project ${{ secrets.GCP_PROJECT_ID }}"
+            echo "::error::Alternatively, grant roles/artifactregistry.admin to the deploy SA to allow auto-create."
+            exit 1
+          fi
+
       - name: Build and push image
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
+          set -x
           IMAGE="${{ env.REGION }}-docker.pkg.dev/$PROJECT_ID/${{ env.REPO }}/${{ steps.meta.outputs.service }}:${{ steps.meta.outputs.tag }}"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          docker version
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
 
@@ -84,6 +123,7 @@ jobs:
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
+          set -x
           gcloud run deploy "${{ steps.meta.outputs.service }}" \
             --image "$IMAGE" \
             --region "${{ env.REGION }}" \
@@ -96,6 +136,7 @@ jobs:
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
+          set -x
           URL=$(gcloud run services describe "${{ steps.meta.outputs.service }}" \
             --project "$PROJECT_ID" --region "${{ env.REGION }}" \
             --format='value(status.url)')

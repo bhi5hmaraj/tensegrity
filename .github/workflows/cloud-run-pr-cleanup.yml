@@ -6,6 +6,8 @@ on:
 
 env:
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  CLOUDSDK_CORE_VERBOSITY: debug
+  CLOUDSDK_CORE_LOG_HTTP: 'true'
 
 jobs:
   cleanup:
@@ -24,8 +26,20 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Debug gcloud context
+        run: |
+          set -x
+          which gcloud
+          gcloud --version
+          gcloud info
+          gcloud config list
+          gcloud auth list
+          echo "PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}"
+          echo "REGION=${{ env.REGION }}"
+
       - name: Delete preview service (ignore if missing)
         run: |
+          set -x
           SERVICE="tensegrity-pr-${{ github.event.number }}"
           gcloud run services delete "$SERVICE" \
             --region "${{ env.REGION }}" \
