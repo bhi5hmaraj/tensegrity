@@ -136,6 +136,52 @@ async def health():
     return {"status": "ok", "service": "PadAI Master Server"}
 
 
+@app.get("/api/debug")
+async def debug_info():
+    """Debug endpoint to check database and environment."""
+    import os
+    from pathlib import Path
+
+    beads_dir = Path(WORKSPACE) / ".beads"
+    info = {
+        "workspace": WORKSPACE,
+        "beads_dir_exists": beads_dir.exists(),
+        "beads_contents": [],
+        "env": {
+            "BD_NO_AUTO_IMPORT": os.getenv("BD_NO_AUTO_IMPORT"),
+            "BD_TIMEOUT_SECS": os.getenv("BD_TIMEOUT_SECS"),
+            "LOG_LEVEL": os.getenv("LOG_LEVEL"),
+        }
+    }
+
+    if beads_dir.exists():
+        try:
+            info["beads_contents"] = [f.name for f in beads_dir.iterdir()]
+        except Exception as e:
+            info["beads_contents_error"] = str(e)
+
+    # Try SQLite access
+    try:
+        from .beads_db import find_beads_db, get_status_fast
+        db_path = find_beads_db(WORKSPACE)
+        info["sqlite_db_path"] = db_path
+        info["sqlite_db_exists"] = Path(db_path).exists()
+
+        # Try to query
+        import time
+        start = time.time()
+        status = get_status_fast(WORKSPACE)
+        elapsed = time.time() - start
+        info["sqlite_query_time"] = f"{elapsed:.3f}s"
+        info["sqlite_status"] = status
+        info["sqlite_working"] = True
+    except Exception as e:
+        info["sqlite_error"] = str(e)
+        info["sqlite_working"] = False
+
+    return info
+
+
 @app.get("/api/status", response_model=StatusResponse)
 async def api_status():
     """
