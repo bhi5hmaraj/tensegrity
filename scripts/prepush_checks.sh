@@ -85,12 +85,13 @@ else
   echo "[prepush] (gcloud not found) Skipping GCP validation."
 fi
 
-# 3) Sanity: ensure Dockerfile runs python -m server.main and uses server/requirements.txt
-if ! rg -n "python -m server\.main" Dockerfile >/dev/null 2>&1; then
-  echo "[prepush][ERROR] Dockerfile does not start server with 'python -m server.main'" >&2
-  exit 1
-else
+# 3) Sanity: ensure Dockerfile runs server via python -m server.main (shell or exec-form)
+if rg -n "CMD\s+python\s+-m\s+server\.main" Dockerfile >/dev/null 2>&1 \
+  || rg -n "CMD\s*\[\s*\"python\"\s*,\s*\"-m\"\s*,\s*\"server\.main\"\s*\]" Dockerfile >/dev/null 2>&1; then
   echo "[prepush] ✅ Dockerfile entrypoint references server.main"
+else
+  echo "[prepush][ERROR] Dockerfile does not start server with 'python -m server.main' (shell or exec form)" >&2
+  exit 1
 fi
 
 if ! rg -n "server/requirements\.txt" Dockerfile >/dev/null 2>&1; then

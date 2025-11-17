@@ -44,5 +44,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD sh -c 'curl -fsS "http://localhost:${PORT:-8080}/" >/dev/null || exit 1'
 
-# Run server (shell form for prepush check compatibility)
-CMD python -m server.main
+# Run server (exec-form recommended for signal handling)
+CMD ["python", "-m", "server.main"]
