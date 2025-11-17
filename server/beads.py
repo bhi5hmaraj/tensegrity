@@ -46,18 +46,17 @@ def execute_bd(args: List[str], cwd: str = "/workspace") -> str:
         preflags.append("--json")
     if db_path:
         preflags += ["--db", db_path]
-    # Speed/stability flags; can be disabled via env if needed
-    no_daemon = os.getenv("BD_NO_DAEMON", "1") != "0"
-    no_auto_import = os.getenv("BD_NO_AUTO_IMPORT", "1") != "0"
-    if no_daemon:
-        preflags.append("--no-daemon")
+
+    # Optional flags (only if bd version supports them)
+    # --no-daemon is NOT supported in current bd versions, so we skip it
+    no_auto_import = os.getenv("BD_NO_AUTO_IMPORT", "0") != "0"  # Changed default to 0 (enabled)
     if no_auto_import:
         preflags.append("--no-auto-import")
 
     cmd = ["bd", *preflags, *args_no_json]
     timeout_secs = int(os.getenv("BD_TIMEOUT_SECS", "30"))
 
-    logger.info(f"⏱️  BD EXEC START: {' '.join(args_no_json)} | daemon={not no_daemon} auto_import={not no_auto_import} timeout={timeout_secs}s")
+    logger.info(f"⏱️  BD EXEC START: {' '.join(args_no_json)} | auto_import={not no_auto_import} timeout={timeout_secs}s")
     start_time = time.time()
 
     try:
