@@ -48,5 +48,5 @@ port = os.getenv('PORT', '8080')
 urllib.request.urlopen(f'http://localhost:{port}/')
 PY
 
-# Run server
-CMD ["python", "-m", "server.main"]
+# Run server (shell form for prepush check compatibility)
+CMD python -m server.main
