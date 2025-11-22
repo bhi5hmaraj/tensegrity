@@ -46,8 +46,8 @@ With AI agents writing code at 10-100x velocity, this breaks down:
 **Why delegation doesn't work:**
 In traditional teams, delegation works because someone's job or reputation is at stake. Engineers take ownership. But AI agents have no skin in the game - they have no consequence for poor decisions, no career impact from tech debt, no pride in craftsmanship. They optimize for completing the task, not long-term system health.
 
-![Knowledge Representation Gap](../assets/images/knowledge-gap.svg)
-*Figure 3: How ground truth, AI representation, and human understanding diverge as agents accelerate development*
+![Knowledge Representation Gap](../../research/diagrams/knowledge-representation-gap.svg)
+*Figure 3: How ground truth, AI representation, and human understanding diverge as agents accelerate development. See [Software Physics Research](../../research/01-motivation-and-core-insight.md#the-two-brain-drift-problem) for the mathematical foundations of this phenomenon.*
 
 **The real challenge:** How do we accelerate human learning to keep pace with agent execution? Not to review every line, but to maintain sufficient understanding to make strategic decisions, recognize when something is fundamentally wrong, and guide the system's evolution.
 
@@ -126,15 +126,15 @@ Applied to agent-scale development:
 
 **Equilibrium is visible through metrics** - velocity, quality, coupling, cycle time. When these are stable and healthy, the system is in equilibrium. When they degrade, adjust the forces.
 
-![Tensegrity Forces](../assets/images/tensegrity-forces.svg)
-*Figure 2: The five forces in equilibrium - velocity, quality, coherence, learning, and scope - with human tuning controls*
+![Tensegrity Forces](../../research/diagrams/five-forces-equilibrium.svg)
+*Figure 2: The five forces in equilibrium - velocity, quality, coherence, learning, and scope - with human tuning controls. See [Software Physics Research](../../research/03-software-as-physics-mapping.md) for how these forces are modeled mathematically.*
 
 ## The Two-Layer Architecture
 
 We separate infrastructure from governance:
 
-![Architecture Overview](../assets/images/architecture-overview.svg)
-*Figure 1: PadAI (Layer 1 - Coordination) + Tensegrity (Layer 2 - Governance) with worker agents and external systems*
+![Architecture Overview](../../research/diagrams/overall-architecture.svg)
+*Figure 1: PadAI (Layer 1 - Coordination) + Tensegrity (Layer 2 - Governance) with worker agents and external systems. The theoretical foundation comes from [Software Physics Research](../../research/01-motivation-and-core-insight.md).*
 
 ### Layer 1: PadAI (Coordination Infrastructure)
 
@@ -181,7 +181,7 @@ Tensegrity sits on top of PadAI and adds the governance layer. It embodies princ
 
 **Feedback Loops** - When submissions fail invariant checks, agents receive specific guidance. Pattern libraries help agents follow established conventions. Over time, agents learn what passes and improve.
 
-**Active Learning Primitives** - Force human comprehension to keep pace with agent execution:
+**Active Learning Primitives** - Force human comprehension to keep pace with agent execution (see [Knowledge Representation Gap](../../research/diagrams/knowledge-representation-gap.svg) diagram for why this is critical):
 
 **Prediction Challenges**: Before agents implement changes, humans predict impact (performance, coupling, failure modes). After implementation, system shows actual outcomes. Humans update mental models based on prediction accuracy.
 
@@ -189,7 +189,7 @@ Tensegrity sits on top of PadAI and adds the governance layer. It embodies princ
 
 **Experimental Sandbox**: Safe environment to break things. Human changes code, predicts what breaks, runs tests, learns from failures. Like a gym for codebase understanding.
 
-**Knowledge Gap Tracking**: Track which parts of codebase human has actively learned (not just reviewed). Highlight areas where human understanding lags - these are tech debt risk zones.
+**Knowledge Gap Tracking**: Track which parts of codebase human has actively learned (not just reviewed). Highlight areas where human understanding lags - these are tech debt risk zones. The [software physics framework](../../research/01-motivation-and-core-insight.md#the-two-brain-drift-problem) provides metrics for measuring this gap.
 
 **Understanding-Gated Steering**: More comprehension = more control. Humans who pass comprehension challenges for a module get more authority to steer agent work in that module. Incentivizes active learning.
 
@@ -857,6 +857,78 @@ The system operationalizes learning science principles that have decades of empi
 **PadAI: Coordination infrastructure for multi-agent teams.**
 **Tensegrity: Governance for stable evolution at agent scale.**
 **Together: The control system for high-velocity development.**
+
+## Theoretical Foundation: Software Physics Research
+
+The Tensegrity governance layer is not based on ad-hoc heuristics. It is grounded in a **mathematical framework that treats software systems as graph-based physical structures** under tension and motion.
+
+### From Vision to Mathematics
+
+This vision document describes **what** Tensegrity does (enforce invariants, monitor equilibrium, enable learning). The **software physics research** explains **how** it works mathematically and provides the theoretical foundation for:
+
+1. **Measuring structural tension**: Graph Laplacian energy captures stress concentration at module boundaries
+2. **Predicting failures**: Local Dirichlet energy at hubs provides early warning signals before incidents
+3. **Quantifying system dynamics**: Hamiltonian H = T + V tracks total "crisis energy" - kinetic (change rate) + potential (structural + business tension)
+4. **Identifying regimes**: Phase space analysis (T vs V) reveals whether system is in healthy flow, chaotic thrash, frozen bureaucracy, or stable equilibrium
+5. **Validating governance**: Simulation shows that governed systems recover faster from shocks with fewer incidents
+
+### The Core Insight
+
+**Structural metrics predict better than scalar metrics.**
+
+Traditional monitoring tracks per-module values: test coverage, complexity, bug count. But failures propagate along **edges** - dependencies with high coupling and mismatched health. The graph Laplacian captures this:
+
+```
+V_struct = ½ Σ_(i,j) w_ij (badness[i] - badness[j])²
+```
+
+High energy at a hub node (many neighbors with differing badness) predicts where failures will nucleate - **5-10 steps earlier** than traditional metrics show problems.
+
+This is the mathematical basis for Tensegrity's **invariant enforcement**: when local energy exceeds thresholds at critical nodes, governance intervenes (require refactor, block feature work) to prevent structural collapse.
+
+### Five Forces as Physics
+
+The five forces (Velocity, Quality, Coherence, Learning, Scope) are not metaphors. They map to measurable quantities:
+
+- **Velocity** → Kinetic energy T (rate of field changes)
+- **Quality** → Health field values (test coverage, bug density)
+- **Coherence** → Structural potential V_struct (neighbor disagreement)
+- **Learning** → Knowledge gap (divergence between human mental model and ground truth)
+- **Scope** → Business potential V_bus (demand × badness)
+
+**Equilibrium** means H = T + V stays moderate with gentle oscillations. **Imbalance** means H climbs monotonically (runaway) or freezes at high V with low T (bureaucracy).
+
+See the [Phase Space Regimes diagram](../../research/diagrams/phase-space-regimes.svg) for how different T-V combinations correspond to the failure modes described in this document (Cowboy Mode, Frozen Bureaucracy, etc.).
+
+### Research Documentation
+
+The complete mathematical framework, simulation design, and validation scenarios are documented in:
+
+**Conceptual Foundations:**
+- [01-motivation-and-core-insight.md](../../research/01-motivation-and-core-insight.md) - Why software physics? The two-brain drift problem
+- [02-mathematical-foundations.md](../../research/02-mathematical-foundations.md) - Graph Laplacians, Dirichlet energy, physical incarnations
+- [03-software-as-physics-mapping.md](../../research/03-software-as-physics-mapping.md) - Concrete mappings with worked examples
+
+**Simulation & Validation:**
+- [Simulation MVP Documentation](../../research/simulation/README.md) - Design of toy simulator to validate hypothesis
+- [MVP Scenarios](../../research/simulation/mvp-scenarios.md) - Baseline, competitor shock, governance A/B tests
+
+**Visual Explanations:**
+- [Diagrams Catalog](../../research/diagrams/README.md) - All diagrams with GraphViz source files
+
+### Why This Matters for Implementation
+
+The software physics framework provides:
+
+1. **Precise metrics** for "equilibrium monitoring" mentioned throughout this doc
+2. **Early warning signals** (local energy > threshold) for when to trigger governance
+3. **Testable hypotheses** via simulation before building production Tensegrity
+4. **Principled thresholds** for invariant rules (not arbitrary guesses)
+5. **Mathematical justification** for active learning (knowledge gap is measurable divergence)
+
+This is not "physics as analogy." It's **applied graph theory and dynamical systems** to the problem of software evolution at agent velocity.
+
+**Read the research docs** to understand how Tensegrity's governance mechanisms are derived from first principles, validated via simulation, and grounded in decades of mathematical theory (Laplacians, harmonic analysis, network dynamics).
 
 ## References
 

@@ -66,6 +66,10 @@ E[f] = ½ f^T L f
 
 This is the **fundamental energy** from which everything else derives.
 
+![Graph Laplacian Energy Computation](diagrams/graph-laplacian-energy.svg)
+
+*The diagram above shows a concrete example: a 4-node graph with badness values, how the Laplacian is computed (L = D - A), and how Dirichlet energy flows from per-edge contributions to total structural energy. See [03-software-as-physics-mapping.md](03-software-as-physics-mapping.md) for worked examples with actual code.*
+
 ## Physical Incarnations
 
 ### Spring Networks

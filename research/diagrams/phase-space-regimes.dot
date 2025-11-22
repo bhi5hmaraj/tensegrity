@@ -1,0 +1,84 @@
+digraph PhaseSpaceRegimes {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Title
+    title [label="Phase Space: T vs V Regimes", shape=plaintext, fontsize=16, fontname="bold"];
+
+    // Phase space quadrants
+    subgraph cluster_phase_space {
+        label="Phase Space (T vs V)";
+        style=filled;
+        color=white;
+
+        // Quadrant 1: High T, Low V (Healthy Flow)
+        q1 [label="Healthy Flow\n\nT: High (lots of motion)\nV: Low (low tension)\nH: Moderate\n\nCharacteristics:\n• Rapid iteration\n• Well-constrained structure\n• Clean code + good tests\n• Features shipping smoothly\n\nExample:\n• Refactors happening\n• New features in healthy modules\n• CI/CD passing\n\nGovernance: None needed",
+            fillcolor=lightgreen, style=filled, width=3, height=2.5];
+
+        // Quadrant 2: High T, High V (Chaotic Thrash)
+        q2 [label="Chaotic Thrash\n\nT: High (lots of motion)\nV: High (high tension)\nH: Very High (crisis)\n\nCharacteristics:\n• Lots of changes\n• Breaking things\n• Incidents firing\n• Stressed modules\n\nExample:\n• Competitor shock response\n• Unconstrained feature rush\n• Technical debt ignored\n\nGovernance: EMERGENCY BRAKE",
+            fillcolor=salmon, style=filled, width=3, height=2.5];
+
+        // Quadrant 3: Low T, Low V (Stable Equilibrium)
+        q3 [label="Stable Equilibrium\n\nT: Low (little motion)\nV: Low (low tension)\nH: Low\n\nCharacteristics:\n• Steady state\n• Mature codebase\n• Maintenance mode\n• Few changes needed\n\nExample:\n• Well-tested library\n• Stable infrastructure\n• No urgent features\n\nGovernance: Monitor only\n\nNote: Can be good (finished)\nor bad (stagnant)",
+            fillcolor=lightblue, style=filled, width=3, height=2.5];
+
+        // Quadrant 4: Low T, High V (Frozen Bureaucracy)
+        q4 [label="Frozen Bureaucracy\n\nT: Low (little motion)\nV: High (high tension)\nH: High\n\nCharacteristics:\n• System under stress\n• But no one fixing it\n• Fear of breaking things\n• Process paralysis\n\nExample:\n• Complex legacy system\n• High coupling, low health\n• Too risky to change\n• Team afraid to act\n\nGovernance: UNFREEZE\n(relax constraints, refactor)",
+            fillcolor=lightgray, style=filled, width=3, height=2.5];
+
+        // Arrange in 2x2 grid
+        {rank=same; q1; q2;}
+        {rank=same; q3; q4;}
+    }
+
+    // Axes
+    t_axis [label="T (Kinetic Energy)\n\nRate of change\nHow fast is system evolving?", shape=plaintext];
+    v_axis [label="V (Potential Energy)\n\nStructural + Business tension\nHow stressed is system?", shape=plaintext];
+
+    // Trajectories
+    subgraph cluster_trajectories {
+        label="Common Trajectories";
+        style=filled;
+        color=lightyellow;
+
+        traj_healthy [label="Healthy Project:\nq3 → q1 → q3\n(stable → active dev → stable)",
+                      fillcolor=lightgreen, style=filled];
+
+        traj_crisis [label="Crisis:\nq1 → q2 → q4\n(healthy → thrash → frozen)",
+                     fillcolor=salmon, style=filled];
+
+        traj_recovery [label="Governed Recovery:\nq2 → q3 → q1\n(emergency brake → refactor → resume)",
+                       fillcolor=lightcyan, style=filled];
+    }
+
+    // Governance interventions
+    subgraph cluster_governance {
+        label="Governance Rules by Quadrant";
+        style=filled;
+        color=lightblue;
+
+        gov_q1 [label="Q1 (Healthy): Monitor only\nNo intervention needed", fillcolor=lightgreen, style=filled];
+        gov_q2 [label="Q2 (Chaotic): Emergency brake\nIf H > 2.0: pause features\nRequire refactors", fillcolor=salmon, style=filled];
+        gov_q3 [label="Q3 (Stable): Monitor only\nCheck if innovation needed", fillcolor=lightblue, style=filled];
+        gov_q4 [label="Q4 (Frozen): Unfreeze\nRelax constraints\nScheduled refactor sprint\nPay down debt", fillcolor=lightgray, style=filled];
+    }
+
+    // Real-world examples
+    examples [label="Real-World Mapping:\n\nQ1: Well-run agile team, CI/CD, clean architecture\nQ2: Startup racing competitor, cutting corners\nQ3: Mature open-source library, stable API\nQ4: Legacy enterprise system, 10-year-old monolith",
+              shape=note, fillcolor=wheat, style=filled];
+
+    // Measurements
+    measurements [label="How to Measure Quadrant:\n\nT = ½ Σ m_i (Δbad_i)²\n  → Compute from git churn + field changes\n\nV = V_struct + V_bus\n  → V_struct from Laplacian\n  → V_bus from demand × badness\n\nH = T + V\n\nPlot (T, V) point each time step\nObserve which quadrant over time",
+                  shape=note, fillcolor=lightcyan, style=filled];
+
+    title -> cluster_phase_space;
+    cluster_phase_space -> cluster_trajectories;
+    cluster_trajectories -> cluster_governance;
+    cluster_governance -> examples;
+    examples -> measurements;
+
+    label="\n\nPhase Space Regimes and Governance\n\nDifferent quadrants require different interventions";
+    labelloc=b;
+    fontsize=12;
+}

@@ -8,6 +8,10 @@ This directory contains the design and implementation for a **toy simulator** th
 
 **Status**: Design phase → Implementation starting
 
+![Architecture Overview](../diagrams/overall-architecture.svg)
+
+*The diagram above shows how this software physics research provides the theoretical foundation for Tensegrity governance (Layer 2), which sits on top of PadAI coordination infrastructure (Layer 1). See [../../docs/design/vision_architecture.md](../../docs/design/vision_architecture.md) for the full vision.*
+
 ## Documentation Structure
 
 1. **[mvp-overview.md](./mvp-overview.md)** - Start here

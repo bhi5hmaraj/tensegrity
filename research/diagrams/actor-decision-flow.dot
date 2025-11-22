@@ -1,0 +1,88 @@
+digraph ActorDecisionFlow {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Input: Current state
+    state [label="Current System State\n• Graph G(t)\n• Fields: health, complexity, risk, demand\n• Energies: H, T, V\n• Flow field f: V → ℝ²",
+           shape=box, fillcolor=lightblue, style=filled];
+
+    // Actor types
+    subgraph cluster_actors {
+        label="Three Actor Types";
+        style=filled;
+        color=lightgray;
+
+        fe [label="FeatureEngineer\n• Goal: Maximize delivered value\n• Strategy: Follow demand signal\n• Actions: FeatureChange, AddConstraint",
+            fillcolor=lightgreen, style=filled];
+
+        re [label="RefactorEngineer\n• Goal: Minimize technical debt\n• Strategy: Follow gradient ∇V\n• Actions: Refactor, AddTest",
+            fillcolor=lightcyan, style=filled];
+
+        ai [label="AIAgent\n• Goal: Maximize velocity\n• Strategy: Mixed (80% features, 20% quality)\n• Actions: FeatureChange, Refactor, AddConstraint",
+            fillcolor=lavender, style=filled];
+    }
+
+    // Decision process (example: FeatureEngineer)
+    subgraph cluster_fe_decision {
+        label="FeatureEngineer Decision Process";
+        style=filled;
+        color=lightyellow;
+
+        fe_input [label="1. Observe flow field f[i] for all nodes", shape=box];
+        fe_filter [label="2. Filter: demand[i] > threshold", shape=box];
+        fe_rank [label="3. Rank by: demand[i] × (1 - health[i])\n(high-demand, low-health = priority)", shape=box];
+        fe_gov [label="4. Check governance constraints\n• Is health[i] < floor?\n• Is E_local[neighbor] > limit?", shape=diamond, fillcolor=mistyrose, style=filled];
+        fe_blocked [label="Blocked:\nChoose Refactor instead", fillcolor=salmon, style=filled];
+        fe_allowed [label="Allowed:\nChoose FeatureChange(i)", fillcolor=lightgreen, style=filled];
+
+        fe_input -> fe_filter;
+        fe_filter -> fe_rank;
+        fe_rank -> fe_gov;
+        fe_gov -> fe_blocked [label="Violates"];
+        fe_gov -> fe_allowed [label="Passes"];
+    }
+
+    // Decision process (example: RefactorEngineer)
+    subgraph cluster_re_decision {
+        label="RefactorEngineer Decision Process";
+        style=filled;
+        color=lightcyan;
+
+        re_input [label="1. Compute ∇V[i] = (L · bad)[i] for all nodes", shape=box];
+        re_rank [label="2. Rank by: |∇V[i]| × centrality[i]\n(high tension at important nodes)", shape=box];
+        re_choose [label="3. Choose highest-ranked node i", shape=box];
+        re_action [label="Action: Refactor(i) or AddTest(i)", fillcolor=lightgreen, style=filled];
+
+        re_input -> re_rank;
+        re_rank -> re_choose;
+        re_choose -> re_action;
+    }
+
+    // Output: Action event
+    action_event [label="Action Event\n• Type: FeatureChange | Refactor | AddTest | AddConstraint\n• Target: node i\n• Parameters: Δhealth, Δcomplexity, etc.",
+                  shape=box, fillcolor=yellow, style=filled];
+
+    // Connect state to actors
+    state -> fe;
+    state -> re;
+    state -> ai;
+
+    // Connect actors to decision processes
+    fe -> fe_input;
+    re -> re_input;
+
+    // Connect decisions to action
+    fe_allowed -> action_event;
+    fe_blocked -> action_event;
+    re_action -> action_event;
+
+    // Feedback
+    feedback [label="State Transition\nstate(t+1) = apply_event(action, state(t))",
+              shape=box, fillcolor=lightblue, style=filled];
+    action_event -> feedback;
+    feedback -> state [label="Next iteration", style=dashed];
+
+    label="\n\nActor Decision-Making Flow\n\nEach actor observes state, applies strategy, chooses action constrained by governance";
+    labelloc=b;
+    fontsize=12;
+}

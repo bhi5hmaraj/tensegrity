@@ -1,0 +1,59 @@
+digraph SimulationLoop {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Initial state
+    init [label="Initialize State (t=0)\n• Graph structure\n• Field values\n• Actor instances", shape=box, fillcolor=lightblue, style=filled];
+
+    // Main loop
+    subgraph cluster_loop {
+        label="Main Loop: for t in 1..n_steps";
+        style=filled;
+        color=lightgray;
+
+        // Step 1: Scheduled events
+        scheduled [label="1. Apply Scheduled Events\n• DemandShock\n• NewRequirement\n• Incident", fillcolor=lightyellow, style=filled];
+
+        // Step 2: Actor actions
+        actors [label="2. Actor Actions (Sequential)\nfor each actor:\n  action = actor.choose_action(state)\n  state = apply_event(action, state)", fillcolor=lightgreen, style=filled];
+
+        // Step 3: Update derived fields
+        derived [label="3. Update Derived Fields\n• Recompute risk from health+complexity\n• Update badness composite\n• Recalculate flow field", fillcolor=lightcyan, style=filled];
+
+        // Step 4: Update energies
+        energies [label="4. Compute Physics\n• V_struct = ½ bad^T L bad\n• V_bus = Σ demand × badness\n• T = ½ Σ m (Δbad)²\n• H = T + V", fillcolor=lavender, style=filled];
+
+        // Step 5: Check governance
+        governance [label="5. Apply Governance Rules\n• If E_local[hub] > threshold:\n    block features, require refactor\n• If H > emergency_threshold:\n    pause all feature work", fillcolor=mistyrose, style=filled];
+
+        // Step 6: Log
+        log [label="6. Log State\n• All field values\n• H, T, V\n• Events that occurred\n• Governance interventions", fillcolor=wheat, style=filled];
+
+        // Flow within loop
+        scheduled -> actors;
+        actors -> derived;
+        derived -> energies;
+        energies -> governance;
+        governance -> log;
+    }
+
+    // Conditional: continue or stop
+    decision [label="t < n_steps?", shape=diamond, fillcolor=lightyellow, style=filled];
+
+    // Output
+    output [label="Output Results\n• history.csv\n• plots (H vs t, phase space)\n• field evolution JSON", shape=box, fillcolor=lightgreen, style=filled];
+
+    // Flow
+    init -> scheduled;
+    log -> decision;
+    decision -> scheduled [label="Yes"];
+    decision -> output [label="No"];
+
+    // Analysis
+    analysis [label="Analysis\n• Validate hypothesis\n• Compare governed vs unconstrained\n• Identify early warnings", shape=box, fillcolor=lightblue, style=filled];
+    output -> analysis;
+
+    label="\n\nDiscrete-Time Simulation Loop\n\nEach step: Events → Actor actions → Physics update → Governance → Log";
+    labelloc=b;
+    fontsize=12;
+}

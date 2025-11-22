@@ -14,6 +14,10 @@ This document specifies how the simulator operates: actor types, event primitive
 
 Actors observe the state (G, F) and choose actions. Each actor has a **policy** that determines what it does.
 
+![Actor Decision Flow](../diagrams/actor-decision-flow.svg)
+
+*The diagram above shows how actors observe state, apply their strategy, and choose actions constrained by governance rules. Each actor type follows a different decision process based on their goals.*
+
 ### 1.1 Feature Engineer (FE)
 
 **Goal**: Ship features fast, respond to business demand
@@ -275,6 +279,10 @@ risk['G_featureComp'] = 0.4
 ---
 
 ## 3. The Simulation Loop
+
+![Simulation Loop](../diagrams/simulation-loop.svg)
+
+*The diagram above shows the discrete-time simulation loop: scheduled events → actor actions → update derived fields → compute physics → apply governance → log → repeat.*
 
 ### 3.1 Discrete Time Stepping
 

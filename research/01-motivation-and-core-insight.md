@@ -33,6 +33,10 @@ You described observing a critical phenomenon: when agents operate at high veloc
 
 When these oscillators drift out of phase—when their natural frequencies diverge too much—no reasonable coupling strength will keep them synchronized. This is **textbook synchronization theory** from dynamical systems.
 
+![Knowledge Representation Gap](diagrams/knowledge-representation-gap.svg)
+
+*The diagram above shows how the knowledge representation gap grows over time when AI agents evolve the codebase faster than humans can track. Tensegrity's active learning primitives keep these representations aligned. See also: [../../docs/design/vision_architecture.md](../../docs/design/vision_architecture.md#active-learning-primitives).*
+
 ### Current Approaches Fall Short
 
 Existing metrics and tools treat symptoms, not structure:
@@ -97,6 +101,10 @@ Track not just state but **trajectories** through (H, complexity, coupling) spac
 - Bad development: H climbs monotonically (runaway complexity)
 - Frozen: H high, T low (lots of constraint, no motion—bureaucracy)
 - Chaotic: H high, T high (lots of motion, structure stressed—thrash)
+
+![Phase Space Regimes](diagrams/phase-space-regimes.svg)
+
+*The diagram above maps the T vs V phase space into four regimes, each requiring different governance interventions. Understanding which regime your system is in guides which actions to take.*
 
 These are **qualitatively different regimes** you can see and steer away from.
 
