@@ -1,0 +1,45 @@
+{
+  "test1_stationarity": {
+    "pass": true,
+    "skipped": true
+  },
+  "test2_mean_stability": {
+    "pass": false,
+    "t_statistic": -6.779450619203878,
+    "p_value": 2.0641781690689012e-09,
+    "mean_first": 0.8482344152250004,
+    "mean_second": 0.9395930780843755,
+    "criterion": "p > 0.05"
+  },
+  "test3_bounded_variance": {
+    "pass": true,
+    "mean": 0.8958165271990746,
+    "std": 0.07647172602124153,
+    "cv": 0.08536538866986929,
+    "criterion": "CV < 0.3"
+  },
+  "test4_reasonable_range": {
+    "pass": true,
+    "mean": 0.8958165271990746,
+    "criterion": "0.5 < mean < 2.0"
+  },
+  "test5_finite_values": {
+    "pass": true,
+    "has_nan": false,
+    "has_inf": false,
+    "has_negative_T": false,
+    "has_negative_V": false,
+    "criterion": "All values finite and non-negative"
+  },
+  "test6_low_incidents": {
+    "pass": true,
+    "incident_count": 0,
+    "criterion": "< 5 incidents"
+  },
+  "summary": {
+    "passed": 5,
+    "total": 6,
+    "pass_rate": 0.8333333333333334,
+    "overall_pass": true
+  }
+}
