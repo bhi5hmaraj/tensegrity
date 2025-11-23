@@ -79,6 +79,17 @@ Connection to experiments/:
 - Model performance tracking
 - When to abandon a model
 
+### 06-economics-and-markets.md
+**Economics and Mechanism Design for Agent Coordination**
+
+Markets vs central planning:
+- Central planning problems (Soviet-style coordination bottlenecks)
+- Market mechanisms (prices, auctions, budgets, trading)
+- Mechanism design principles (incentive compatibility, externality pricing)
+- Four market structures (task auctions, resource trading, knowledge markets, debt trading)
+- Governance via economic incentives (not top-down rules)
+- Experimental validation (market vs planning at scale)
+
 ---
 
 ## Key Insight: Model Pluralism
@@ -151,12 +162,13 @@ Different aspects of governance may require different models:
 
 | Model | Theory Docs | Simulator | Experiments | Validation |
 |-------|-------------|-----------|-------------|------------|
-| Physics | ✓ (01-06) | ⊙ (MVP design) | ⊙ (Exp01-02 designed) | ☐ |
-| Ecology | ⊙ (brief sketch) | ☐ | ☐ | ☐ |
-| Economics | ⊙ (brief sketch) | ☐ | ☐ | ☐ |
-| Cognitive | ⊙ (brief sketch) | ☐ | ☐ | ☐ |
-| CAS | ⊙ (brief sketch) | ☐ | ☐ | ☐ |
-| Organism | ⊙ (brief sketch) | ☐ | ☐ | ☐ |
+| Physics | ✓ (01-06, learning/) | ✓ (MVP complete) | ⊙ (Exp01 passed) | ⊙ (baseline validated) |
+| Economics | ✓ (06-economics-and-markets) | ☐ | ☐ (design pending) | ☐ |
+| Business/Socio-technical | ✓ (business/) | ☐ | ⊙ (6 experiments designed) | ☐ |
+| Ecology | ⊙ (brief sketch in catalog) | ☐ | ☐ | ☐ |
+| Cognitive | ⊙ (brief sketch in catalog) | ☐ | ☐ | ☐ |
+| CAS | ⊙ (brief sketch in catalog) | ☐ | ☐ | ☐ |
+| Organism | ⊙ (brief sketch in catalog) | ☐ | ☐ | ☐ |
 
 Legend: ✓ = Complete, ⊙ = In progress, ☐ = Not started
 
