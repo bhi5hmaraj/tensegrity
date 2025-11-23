@@ -47,6 +47,12 @@ START: What is your primary problem?
        └─> Use Multi-model (see integration guide below)
 ```
 
+### Visual Decision Tree
+
+![Decision Tree](diagrams/04-decision-tree.svg)
+
+**Interactive visual guide** for model selection based on problem characteristics (structural vs. resource, small vs. large scale, single vs. cross-domain).
+
 ---
 
 ## Detailed Decision Framework

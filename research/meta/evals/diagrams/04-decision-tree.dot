@@ -1,0 +1,51 @@
+digraph DecisionTree {
+    rankdir=TB;
+    node [shape=box, style=filled];
+
+    Start [label="What is your problem?", shape=ellipse, fillcolor=lightblue];
+
+    // First level
+    Q1 [label="Structural coupling\n(architecture, dependencies)?"];
+    Q2 [label="Resource allocation\n(who does what)?"];
+    Q3 [label="Agent interactions\n(competition)?"];
+    Q4 [label="Human factors\n(comprehension)?"];
+    Q5 [label="Emergent behavior\n(power laws)?"];
+
+    Start -> Q1 [label="Yes"];
+    Start -> Q2 [label="No"];
+    Q2 -> Q3 [label="No"];
+    Q3 -> Q4 [label="No"];
+    Q4 -> Q5 [label="No"];
+
+    // Physics branch
+    Physics [label="USE PHYSICS\n\nCompute V_struct\nIdentify high-coupling\nmodules", fillcolor=lightcoral, shape=box, style="rounded,filled"];
+    Q1 -> Physics [label="Yes"];
+
+    // Economics branch
+    Q2_scale [label="How many agents?"];
+    Q2 -> Q2_scale [label="Yes"];
+    EconSmall [label="USE OPTIMIZATION\n\nLinear programming\nfor n < 20", fillcolor=lightgreen];
+    EconLarge [label="USE ECONOMICS\n\nMarkets, auctions\nfor n ≥ 20", fillcolor=lightgreen];
+    Q2_scale -> EconSmall [label="< 20"];
+    Q2_scale -> EconLarge [label="≥ 20"];
+
+    // Ecology branch
+    Ecology [label="USE ECOLOGY\n\nLotka-Volterra\nCompetition dynamics", fillcolor=lightcyan];
+    Q3 -> Ecology [label="Yes"];
+
+    // Cognitive branch
+    Cognitive [label="USE COGNITIVE\n\nChunking analysis\nActive learning", fillcolor=lavender];
+    Q4 -> Cognitive [label="Yes"];
+
+    // CAS branch
+    CAS [label="USE CAS\n\nAgent-based simulation\nPower law analysis", fillcolor=wheat];
+    Q5 -> CAS [label="Yes"];
+
+    // Multi-model
+    Q6 [label="Cross-scale\n(software + business)?"];
+    Q5 -> Q6 [label="No"];
+    Multi1 [label="USE MULTI-MODEL\n\nPhysics ⊗ SysDyn\nNested composition", fillcolor=yellow];
+    Multi2 [label="USE SYSTEM DYNAMICS\n\nStocks, flows\nFeedback loops", fillcolor=lightyellow];
+    Q6 -> Multi1 [label="Yes"];
+    Q6 -> Multi2 [label="No"];
+}

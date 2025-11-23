@@ -1,0 +1,46 @@
+digraph MultiModelComposition {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled"];
+
+    // Three types of composition
+    subgraph cluster_monoidal {
+        label="Monoidal Composition (Parallel)\nM₁ ⊗ M₂";
+        style=filled;
+        fillcolor=lightgray;
+
+        M1 [label="Physics\n𝒳₁ = T*𝒬", fillcolor=lightcoral];
+        M2 [label="Economics\n𝒳₂ = Δⁿ × ℝ₊ⁿ", fillcolor=lightgreen];
+        Tensor [label="M₁ ⊗ M₂\n𝒳 = 𝒳₁ × 𝒳₂\n𝒪 = 𝒪₁ ⊗ 𝒪₂", shape=ellipse, fillcolor=yellow];
+
+        M1 -> Tensor;
+        M2 -> Tensor;
+    }
+
+    subgraph cluster_sequential {
+        label="Sequential Composition (Pipeline)\nM₁ → M₂ → M₃";
+        style=filled;
+        fillcolor=lightgray;
+
+        Input [label="Problem State\nx₀", shape=ellipse, fillcolor=white];
+        Step1 [label="SysDyn\nDiagnose loops", fillcolor=lightyellow];
+        Step2 [label="Physics\nIdentify modules", fillcolor=lightcoral];
+        Step3 [label="Economics\nAllocate budget", fillcolor=lightgreen];
+        Output [label="Solution\nx_final", shape=ellipse, fillcolor=white];
+
+        Input -> Step1 -> Step2 -> Step3 -> Output;
+    }
+
+    subgraph cluster_hierarchical {
+        label="Hierarchical Composition (Nested)\nπ₊: M_inner → M_outer";
+        style=filled;
+        fillcolor=lightgray;
+
+        Outer [label="System Dynamics\n(Business level)\nRevenue, Customers", fillcolor=lightyellow];
+        Inner [label="Physics\n(Software level)\nV_struct, H", fillcolor=lightcoral];
+
+        Inner -> Outer [label="π₊: Pushforward\nCoarse-grain", style=bold];
+    }
+
+    Tensor -> Input [style=invis];
+    Output -> Outer [style=invis];
+}

@@ -1,0 +1,61 @@
+digraph FiberBundle {
+    rankdir=TB;
+    node [shape=box, style=filled];
+
+    // Total space E
+    subgraph cluster_total {
+        label="Total Space ℰ (Models × Contexts)";
+        style=filled;
+        fillcolor=lightgray;
+
+        // Fibers over different contexts
+        subgraph cluster_f1 {
+            label="π⁻¹(Structural)";
+            F1_M1 [label="Physics", fillcolor=lightcoral];
+            F1_M2 [label="CAS", fillcolor=wheat];
+        }
+
+        subgraph cluster_f2 {
+            label="π⁻¹(Resource Allocation)";
+            F2_M1 [label="Economics", fillcolor=lightgreen];
+            F2_M2 [label="Ecology", fillcolor=lightcyan];
+        }
+
+        subgraph cluster_f3 {
+            label="π⁻¹(Cross-scale)";
+            F3_M1 [label="System Dynamics", fillcolor=lightyellow];
+            F3_M2 [label="Physics ⊗ SysDyn", fillcolor=yellow];
+        }
+
+        subgraph cluster_f4 {
+            label="π⁻¹(Human factors)";
+            F4_M1 [label="Cognitive", fillcolor=lavender];
+            F4_M2 [label="Organism", fillcolor=pink];
+        }
+    }
+
+    // Base space B
+    subgraph cluster_base {
+        label="Base Space ℬ (Problem Contexts)";
+        style=filled;
+        fillcolor=white;
+
+        C1 [label="Structural\nproblems", shape=ellipse];
+        C2 [label="Resource\nallocation", shape=ellipse];
+        C3 [label="Cross-scale\ndynamics", shape=ellipse];
+        C4 [label="Human\nfactors", shape=ellipse];
+    }
+
+    // Projection π
+    F1_M1 -> C1 [label="π", style=bold, color=red];
+    F1_M2 -> C1 [style=bold, color=red];
+    F2_M1 -> C2 [style=bold, color=red];
+    F2_M2 -> C2 [style=bold, color=red];
+    F3_M1 -> C3 [style=bold, color=red];
+    F3_M2 -> C3 [style=bold, color=red];
+    F4_M1 -> C4 [style=bold, color=red];
+    F4_M2 -> C4 [style=bold, color=red];
+
+    // Annotation
+    Note [label="Fiber π⁻¹(c) = all models\napplicable to context c", shape=note, fillcolor=yellow];
+}

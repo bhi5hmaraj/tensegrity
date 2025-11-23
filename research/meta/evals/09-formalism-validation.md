@@ -338,6 +338,12 @@ $$\mu(H, (M, H, I, A)) = H$$
 
 ## Part II: Morphisms Between Models
 
+### Figure II.1: Model Category Structure
+
+![Model Category](diagrams/01-model-category.svg)
+
+**Visualization of morphisms between models** showing exact morphisms (solid arrows), approximate morphisms (dashed), and isomorphisms (bold). Key insight: Ecology ↔ Economics are isomorphic under replicator dynamics normalization.
+
 ### Morphism 1: Physics → Economics
 
 **State map:** $\phi_X : T^*\mathcal{Q} \to \Delta^n \times \mathbb{R}^n_+$
@@ -511,6 +517,12 @@ $$\mathcal{L} = D_{\text{KL}}(p_{\text{true}} \| p_{\text{multi}})$$
 $$\mathbf{w}^* = \frac{\mathbf{\Sigma}^{-1}\mathbf{1}}{\mathbf{1}^T\mathbf{\Sigma}^{-1}\mathbf{1}}$$
 
 **Practical decision:** Use this formula to weight model predictions!
+
+### Figure III.4: Multi-Model Composition Strategies
+
+![Multi-Model Composition](diagrams/02-multimodel-composition.svg)
+
+**Visualization of three composition strategies:** Monoidal composition (M₁ ⊗ M₂) for parallel models, sequential composition for pipelines, and hierarchical composition (pushforward) for scale transformations. Shows how to optimally combine models based on information geometry.
 
 ---
 

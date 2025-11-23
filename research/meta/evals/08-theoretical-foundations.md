@@ -146,6 +146,12 @@ $$(\psi \circ \phi)_O = \phi_O \circ \psi_O$$
 
 **This is NOT a trivial category** - not all models are comparable!
 
+**Visual representation:**
+
+![Model Category](diagrams/01-model-category.svg)
+
+**Figure 2.1:** The category $\mathfrak{M}$ showing models as objects (boxes with their state space geometries) and morphisms as arrows. Bold arrows indicate exact morphisms, dashed arrows show approximate morphisms. Note that Physics and Economics are connected only approximately, while Ecology ↔ Economics has an isomorphism (bidirectional arrows).
+
 ---
 
 ## Part III: Observables and Measurements
@@ -184,6 +190,12 @@ $$\kappa(o) = \frac{1}{1 + \sigma^2(\mu(o, \cdot))}$$
 where $\sigma^2$ is measurement noise variance.
 
 **This connects to Dimension 5 (Measurability) from evaluation framework.**
+
+**Visual representation:**
+
+![Observable Algebra Structure](diagrams/05-observable-algebra.svg)
+
+**Figure 3.1:** Observable algebras for Physics (with Poisson structure) and Economics (commutative). The diagram shows generators (q, p, H for physics; b, p, U for economics) and their relationships. The morphism φ_O shows how ROI in economics pulls back to V_business/V_struct in physics.
 
 ---
 
@@ -298,6 +310,16 @@ $$\bar{q} = \langle q_i \rangle_{\text{modules in subsystem}}$$
 $$\bar{H} = \langle H \rangle = \bar{T} + \bar{V}$$
 
 **This is how System Dynamics emerges from Physics at larger scales.**
+
+**Visual representations:**
+
+![Multi-Model Composition](diagrams/02-multimodel-composition.svg)
+
+**Figure 5.1:** Three types of model composition: (1) Monoidal (parallel) - Physics ⊗ Economics combines state spaces, (2) Sequential (pipeline) - SysDyn → Physics → Economics processes problem step-by-step, (3) Hierarchical (nested) - Physics pushes forward to System Dynamics via coarse-graining.
+
+![Fiber Bundle Structure](diagrams/06-fiber-bundle.svg)
+
+**Figure 5.2:** The fiber bundle π: ℰ → ℬ showing how different models (fibers) live over different problem contexts (base space). Each context has multiple applicable models forming the fiber π⁻¹(c).
 
 ---
 
@@ -512,6 +534,12 @@ Models are "similar" if $d(\Sigma_1, \Sigma_2)$ is small.
 
 **This provides geometric intuition for model space $\mathfrak{M}$!**
 
+### Figure 10.1: Model Signatures Comparison
+
+![Model Signatures](diagrams/07-model-signatures.svg)
+
+**Visual representation of model signatures** showing the characteristic "DNA" of each model type, including their state spaces, observable algebras, and symmetry groups.
+
 ---
 
 ## Part XI: Effective Field Theory Perspective
@@ -558,6 +586,12 @@ $$\mathcal{R}_\Lambda(M^*) = M^*$$
 **Interpretation:** Model structure is scale-invariant (self-similar).
 
 **Example:** Power law models (CAS) are often near fixed points.
+
+### Figure 11.1: Renormalization Group Flow
+
+![RG Flow](diagrams/03-rg-flow.svg)
+
+**Visualization of scale transformations** showing how the Physics model (microscopic) flows through coarse-graining to an Effective Physics model (mesoscopic) and finally to System Dynamics (macroscopic). Each transformation involves information loss quantified by KL divergence.
 
 ---
 
