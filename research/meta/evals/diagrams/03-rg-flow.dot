@@ -1,0 +1,46 @@
+digraph RGFlow {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled"];
+
+    // Scale hierarchy
+    subgraph cluster_micro {
+        label="Microscopic (Λ = module level)";
+        style=filled;
+        fillcolor=lightcoral;
+
+        Micro [label="Physics Model\n\nH = T + V_struct\n\nV = ½qᵀLq\nL = n×n matrix\n\nn = 100 modules", shape=box];
+    }
+
+    subgraph cluster_meso {
+        label="Mesoscopic (Λ' = subsystem level)";
+        style=filled;
+        fillcolor=lightyellow;
+
+        Meso [label="Effective Physics\n\nH̄ = T̄ + V̄_struct\n\nV̄ = ½q̄ᵀL̄q̄\nL̄ = k×k matrix\n\nk = 5 subsystems", shape=box];
+    }
+
+    subgraph cluster_macro {
+        label="Macroscopic (Λ'' = business level)";
+        style=filled;
+        fillcolor=lightgreen;
+
+        Macro [label="System Dynamics\n\nStocks & Flows\n\ndS/dt = F(S,θ)\n\nS = (Revenue,\n     Customers,\n     Debt)", shape=box];
+    }
+
+    // RG transformations
+    Micro -> Meso [label="ℛ_Λ: Coarse-grain\n\nAverage over modules\nin each subsystem", style=bold, color=red];
+    Meso -> Macro [label="ℛ_Λ': Further coarse-grain\n\nProject to business\nobservables", style=bold, color=red];
+
+    // Information loss
+    Loss1 [label="Information Loss:\nI_loss = D_KL(p_micro || p_meso)", shape=ellipse, fillcolor=orange];
+    Loss2 [label="Information Loss:\nI_loss = D_KL(p_meso || p_macro)", shape=ellipse, fillcolor=orange];
+
+    Micro -> Loss1 [style=dotted];
+    Meso -> Loss1 [style=dotted];
+    Meso -> Loss2 [style=dotted];
+    Macro -> Loss2 [style=dotted];
+
+    // Fixed point annotation
+    FP [label="Fixed Point:\nβ(L*) = 0\n\nScale-invariant model", shape=diamond, fillcolor=yellow];
+    Meso -> FP [style=dashed];
+}

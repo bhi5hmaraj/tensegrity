@@ -1,0 +1,35 @@
+digraph ModelCategory {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fillcolor=lightblue];
+    edge [fontsize=10];
+
+    // Models as nodes
+    Physics [label="Physics\n𝒳 = T*𝒬\n(Symplectic)", fillcolor=lightcoral];
+    Economics [label="Economics\n𝒳 = Δⁿ × ℝ₊ⁿ\n(Simplex × Cone)", fillcolor=lightgreen];
+    SysDyn [label="System Dynamics\n𝒳 = ℝⁿ × ℝᵐ\n(Stocks × Flows)", fillcolor=lightyellow];
+    Ecology [label="Ecology\n𝒳 = ℝ₊ⁿ\n(Positive Orthant)", fillcolor=lightcyan];
+    Cognitive [label="Cognitive\n𝒳 = 𝒢 × [0,1]ᵏ\n(Graph × Understanding)", fillcolor=lavender];
+    CAS [label="CAS\n𝒳 = {0,1}ᴺ × ℝᵖ\n(Discrete × Continuous)", fillcolor=wheat];
+    Organism [label="Organism\n𝒳 = ℝ₊ × [0,1] × ℝ₊\n(M × H × I)", fillcolor=pink];
+
+    // Morphisms (arrows)
+    Physics -> Economics [label="φ: Budget from Quality\n(approximate)", style=dashed];
+    Physics -> SysDyn [label="π: Coarse-grain\n(RG flow)", style=bold, color=red];
+    Ecology -> Economics [label="ψ: Normalize populations\n(isomorphic!)", style=bold, color=blue];
+    Economics -> Ecology [label="ψ⁻¹: Scale by K", style=bold, color=blue];
+    Cognitive -> SysDyn [label="ξ: Understanding → Stocks\n(embedding)", style=dashed];
+
+    // Self-loop for identity
+    Physics -> Physics [label="id", style=dotted];
+
+    // Legend
+    subgraph cluster_legend {
+        label="Legend";
+        style=dashed;
+
+        node [shape=plaintext];
+        leg1 [label="Bold = Exact morphism"];
+        leg2 [label="Dashed = Approximate"];
+        leg3 [label="Dotted = Identity"];
+    }
+}

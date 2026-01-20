@@ -1,0 +1,68 @@
+digraph GraphLaplacianEnergy {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Graph structure example
+    subgraph cluster_graph {
+        label="Example Graph: 4-Node System";
+        style=filled;
+        color=lightgray;
+
+        A [label="A\nbad=0.8", fillcolor=salmon, style="filled,rounded"];
+        B [label="B\nbad=0.3", fillcolor=lightgreen, style="filled,rounded"];
+        C [label="C\nbad=0.5", fillcolor=yellow, style="filled,rounded"];
+        D [label="D\nbad=0.7", fillcolor=orange, style="filled,rounded"];
+
+        A -> B [label="w=0.9\nΔ²=0.25", dir=none, penwidth=3, color=red];
+        A -> C [label="w=0.6\nΔ²=0.09", dir=none, penwidth=2, color=orange];
+        B -> C [label="w=0.4\nΔ²=0.04", dir=none, penwidth=1.5, color=yellow];
+        C -> D [label="w=0.5\nΔ²=0.04", dir=none, penwidth=1.5, color=yellow];
+    }
+
+    // Laplacian computation
+    subgraph cluster_laplacian {
+        label="Graph Laplacian L = D - A";
+        style=filled;
+        color=lightblue;
+
+        degree [label="Degree Matrix D\nD[i,i] = Σ w_ij", shape=box];
+        adjacency [label="Adjacency Matrix A\nA[i,j] = w_ij", shape=box];
+        laplacian [label="Laplacian L\nL = D - A", shape=ellipse, fillcolor=cyan, style=filled];
+
+        degree -> laplacian;
+        adjacency -> laplacian;
+    }
+
+    // Energy computation
+    subgraph cluster_energy {
+        label="Dirichlet Energy Computation";
+        style=filled;
+        color=lightyellow;
+
+        bad_field [label="Badness Field\nbad: V → [0,1]", shape=box];
+        edge_contrib [label="Per-Edge Contribution\nE_ij = ½ w_ij (bad[i] - bad[j])²", shape=box];
+        total_energy [label="Total Structural Energy\nV_struct = Σ E_ij = ½ bad^T L bad", shape=ellipse, fillcolor=yellow, style=filled];
+
+        bad_field -> edge_contrib;
+        laplacian -> edge_contrib;
+        edge_contrib -> total_energy;
+    }
+
+    // Local energy at node A
+    local_A [label="Local Energy at A\nE_local[A] = ½ Σ_j w_Aj (bad[A] - bad[j])²\n= ½[0.9×0.25 + 0.6×0.09]\n= 0.14",
+             shape=box, fillcolor=salmon, style=filled];
+
+    // Connect graph to computations
+    A -> bad_field [style=dashed];
+    total_energy -> local_A [label="Decompose\nby node", style=dashed];
+
+    // Legend
+    legend [label="Color Key:\nRed edge = High tension (large Δbad)\nYellow edge = Low tension (small Δbad)\nNode color = Badness level", shape=note, fillcolor=white];
+
+    {rank=same; A; B;}
+    {rank=same; degree; adjacency;}
+
+    label="\n\nGraph Laplacian → Dirichlet Energy Flow\n\nHigh badness difference across strong coupling → High structural tension";
+    labelloc=b;
+    fontsize=12;
+}

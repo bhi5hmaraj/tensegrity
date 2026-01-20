@@ -1,0 +1,28 @@
+digraph ModelSignatures {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled"];
+
+    // Physics signature
+    Physics [label="Physics Signature\n\n𝒳: T*𝒬 (Symplectic)\n𝒪: ⟨q,p,H⟩ (Poisson)\nℒ: Poisson bracket\nG: Sp(2n)\nC: H (Energy)", fillcolor=lightcoral];
+
+    // Economics signature
+    Economics [label="Economics Signature\n\n𝒳: Δⁿ × ℝ₊ⁿ (Simplex × Cone)\n𝒪: ⟨U,ROI⟩ (Commutative)\nℒ: ∇U (Gradient)\nG: Sₙ (Permutation)\nC: Σbᵢ=1 (Budget)", fillcolor=lightgreen];
+
+    // Ecology signature
+    Ecology [label="Ecology Signature\n\n𝒳: ℝ₊ⁿ (Positive orthant)\n𝒪: ⟨N,r,α⟩ (Populations)\nℒ: Lotka-Volterra\nG: Sₙ (if uniform)\nC: ΣNᵢ≈K", fillcolor=lightcyan];
+
+    // CAS signature
+    CAS [label="CAS Signature\n\n𝒳: Discrete × Continuous\n𝒪: ⟨k,P(k),χ⟩ (Statistical)\nℒ: Agent rules (Local)\nG: Sₙ (Agent permutation)\nC: N (Agent count)", fillcolor=wheat];
+
+    // Distances
+    d12 [label="d(Σ_phys, Σ_econ)\n= d_Hausdorff + d_algebra\n≈ LARGE\n(Different geometry)", shape=ellipse, fillcolor=orange];
+    d13 [label="d(Σ_phys, Σ_eco)\n≈ MEDIUM\n(Similar dynamics)", shape=ellipse, fillcolor=yellow];
+    d23 [label="d(Σ_econ, Σ_eco)\n≈ SMALL\n(Isomorphic cases!)", shape=ellipse, fillcolor=lightgreen];
+
+    Physics -> d12 [style=dotted];
+    Economics -> d12 [style=dotted];
+    Physics -> d13 [style=dotted];
+    Ecology -> d13 [style=dotted];
+    Economics -> d23 [style=dotted];
+    Ecology -> d23 [style=dotted];
+}

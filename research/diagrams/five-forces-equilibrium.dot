@@ -1,0 +1,81 @@
+digraph FiveForcesEquilibrium {
+    rankdir=LR;
+    node [shape=box, style=rounded];
+
+    // Center: Equilibrium state
+    equilibrium [label="System in\nEquilibrium\n\n(Sustainable\nDevelopment)",
+                 shape=ellipse, fillcolor=lightgreen, style=filled, width=2, height=2];
+
+    // The five forces
+    subgraph cluster_forces {
+        label="Five Forces";
+        style=invis;
+
+        velocity [label="Velocity\n\n• Ship features fast\n• Deploy frequently\n• Iterate quickly",
+                  fillcolor=lightblue, style=filled];
+
+        quality [label="Quality\n\n• Low bug rate\n• High test coverage\n• Clean code",
+                 fillcolor=lightcyan, style=filled];
+
+        coherence [label="Coherence\n\n• Consistent architecture\n• Aligned with vision\n• No contradictions",
+                   fillcolor=lavender, style=filled];
+
+        learning [label="Learning\n\n• Team understands codebase\n• Knowledge is shared\n• Onboarding is smooth",
+                  fillcolor=wheat, style=filled];
+
+        scope [label="Scope\n\n• Bounded complexity\n• Managed dependencies\n• Controlled growth",
+               fillcolor=lightyellow, style=filled];
+    }
+
+    // Forces push on equilibrium
+    velocity -> equilibrium [label="Push:\nGo faster", penwidth=2, color=blue];
+    quality -> equilibrium [label="Pull:\nSlow down,\ntest more", penwidth=2, color=green];
+    coherence -> equilibrium [label="Constrain:\nMaintain\nstructure", penwidth=2, color=purple];
+    learning -> equilibrium [label="Require:\nHuman\ncomprehension", penwidth=2, color=orange];
+    scope -> equilibrium [label="Limit:\nDon't expand\nendlessly", penwidth=2, color=red];
+
+    // Imbalance scenarios
+    subgraph cluster_imbalances {
+        label="Common Imbalances (Failure Modes)";
+        style=filled;
+        color=mistyrose;
+
+        cowboy [label="Cowboy Mode\n\nVelocity >> Quality\n• Ship fast, break things\n• Technical debt accumulates\n• Eventually grinds to halt",
+                fillcolor=salmon, style=filled];
+
+        bureaucracy [label="Bureaucracy\n\nQuality >> Velocity\n• Over-engineered\n• Analysis paralysis\n• Nothing ships",
+                     fillcolor=lightgray, style=filled];
+
+        drift [label="Architectural Drift\n\nVelocity >> Coherence\n• Contradictory patterns\n• Spaghetti dependencies\n• Unmaintainable",
+               fillcolor=orange, style=filled];
+
+        mystery [label="Mystery Codebase\n\nVelocity >> Learning\n• Team doesn't understand it\n• Fear to change anything\n• Bus factor = 0",
+                 fillcolor=yellow, style=filled];
+
+        sprawl [label="Scope Sprawl\n\nVelocity >> Scope Control\n• Feature creep\n• Dependency hell\n• Unmanageable complexity",
+                fillcolor=pink, style=filled];
+    }
+
+    // Equilibrium can decay to imbalances
+    equilibrium -> cowboy [style=dashed, color=red, label="Velocity\nunchecked"];
+    equilibrium -> bureaucracy [style=dashed, color=red, label="Quality\nparanoia"];
+    equilibrium -> drift [style=dashed, color=red, label="Coherence\nignored"];
+    equilibrium -> mystery [style=dashed, color=red, label="Learning\nneglected"];
+    equilibrium -> sprawl [style=dashed, color=red, label="Scope\nuncontrolled"];
+
+    // Governance restores balance
+    governance [label="Tensegrity Governance\n\n• Monitors H, T, V\n• Detects force imbalances\n• Enforces invariants\n• Prevents failure modes",
+                shape=box, fillcolor=lightgreen, style="filled,bold", penwidth=2];
+
+    cowboy -> governance [label="Detect", style=dashed, color=green];
+    bureaucracy -> governance [label="Detect", style=dashed, color=green];
+    drift -> governance [label="Detect", style=dashed, color=green];
+    mystery -> governance [label="Detect", style=dashed, color=green];
+    sprawl -> governance [label="Detect", style=dashed, color=green];
+
+    governance -> equilibrium [label="Restore", penwidth=3, color=green];
+
+    label="\n\nFive Forces in Equilibrium\n\nGovernance monitors physics metrics to detect imbalances and restore equilibrium";
+    labelloc=b;
+    fontsize=12;
+}

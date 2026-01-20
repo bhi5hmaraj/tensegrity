@@ -1,0 +1,56 @@
+digraph ObservableAlgebra {
+    rankdir=TB;
+    node [shape=box, style=filled];
+
+    // Physics observable algebra
+    subgraph cluster_physics {
+        label="Physics Observable Algebra 𝒪_phys";
+        style=filled;
+        fillcolor=lightcoral;
+
+        H [label="H\n(Hamiltonian)", fillcolor=yellow];
+        T [label="T\n(Kinetic)", fillcolor=white];
+        V [label="V_struct\n(Potential)", fillcolor=white];
+        E [label="E_local\n(Local energy)", fillcolor=white];
+        q [label="q_i\n(Positions)", fillcolor=lightgray];
+        p [label="p_i\n(Momenta)", fillcolor=lightgray];
+
+        H -> T [label="H = T + V", dir=none];
+        H -> V [dir=none];
+        T -> p [label="T = Σ p²/2m"];
+        V -> q [label="V = ½qᵀLq"];
+        E -> q [label="E = ½(Lq)²"];
+
+        Poisson [label="{f,g} = Σ(∂f/∂q·∂g/∂p - ∂f/∂p·∂g/∂q)", shape=ellipse, fillcolor=orange];
+        H -> Poisson [style=dotted];
+    }
+
+    // Economics observable algebra
+    subgraph cluster_econ {
+        label="Economics Observable Algebra 𝒪_econ";
+        style=filled;
+        fillcolor=lightgreen;
+
+        U [label="U\n(Utility)", fillcolor=yellow];
+        ROI [label="ROI\n(Return)", fillcolor=white];
+        S [label="Supply", fillcolor=white];
+        D [label="Demand", fillcolor=white];
+        b [label="b_i\n(Budget)", fillcolor=lightgray];
+        price [label="p_i\n(Price)", fillcolor=lightgray];
+
+        U -> b [label="U = Σ u_i(b_i)"];
+        ROI -> b [label="ROI = Value/Price"];
+        ROI -> price [dir=none];
+        S -> price [label="S(p)"];
+        D -> price [label="D(p)"];
+
+        Commute [label="fg = gf\n(Commutative)", shape=ellipse, fillcolor=lightblue];
+        U -> Commute [style=dotted];
+    }
+
+    // Morphism between algebras
+    Pullback [label="φ_O: 𝒪_econ → 𝒪_phys\n\nφ_O(ROI) = V_business/V_struct", shape=diamond, fillcolor=pink];
+
+    ROI -> Pullback [style=dashed];
+    Pullback -> V [style=dashed];
+}

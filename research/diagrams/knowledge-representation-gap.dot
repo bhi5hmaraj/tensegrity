@@ -1,0 +1,77 @@
+digraph KnowledgeRepresentationGap {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Initial state: synchronized
+    subgraph cluster_t0 {
+        label="t=0: Initial Sync";
+        style=filled;
+        color=lightgreen;
+
+        ground_t0 [label="Ground Truth\nCodebase", fillcolor=white, style=filled];
+        ai_t0 [label="AI Mental Model\n(Embedding space)", fillcolor=lightblue, style=filled];
+        human_t0 [label="Human Mental Model\n(Design docs, memory)", fillcolor=lightyellow, style=filled];
+
+        ground_t0 -> ai_t0 [label="≈", dir=both, penwidth=2];
+        ai_t0 -> human_t0 [label="≈", dir=both, penwidth=2];
+        human_t0 -> ground_t0 [label="≈", dir=both, penwidth=2];
+    }
+
+    // After some time: drift begins
+    subgraph cluster_t50 {
+        label="t=50: After 50 AI-driven changes";
+        style=filled;
+        color=yellow;
+
+        ground_t50 [label="Ground Truth\n(Rapidly evolving)", fillcolor=white, style=filled];
+        ai_t50 [label="AI Mental Model\n(Updated via RAG)", fillcolor=lightblue, style=filled];
+        human_t50 [label="Human Mental Model\n(Stale)", fillcolor=lightyellow, style=filled];
+
+        ground_t50 -> ai_t50 [label="≈\n(mostly synced)", penwidth=2];
+        ai_t50 -> human_t50 [label="≠\n(diverging)", color=orange, penwidth=2];
+        human_t50 -> ground_t50 [label="≠≠\n(major gap)", color=red, penwidth=3];
+    }
+
+    // Eventually: total divergence
+    subgraph cluster_t200 {
+        label="t=200: Severe Divergence";
+        style=filled;
+        color=salmon;
+
+        ground_t200 [label="Ground Truth\n(Unknown to humans)", fillcolor=white, style=filled];
+        ai_t200 [label="AI Mental Model\n(Locally consistent)", fillcolor=lightblue, style=filled];
+        human_t200 [label="Human Mental Model\n(Obsolete)", fillcolor=lightyellow, style=filled];
+
+        ground_t200 -> ai_t200 [label="?\n(hard to verify)", style=dashed];
+        ai_t200 -> human_t200 [label="✗\n(completely diverged)", color=red, penwidth=4];
+        human_t200 -> ground_t200 [label="✗✗✗\n(incomprehensible)", color=red, penwidth=5];
+    }
+
+    // Flow of time
+    cluster_t0 -> cluster_t50 [label="AI agents\nmaking changes", style=bold];
+    cluster_t50 -> cluster_t200 [label="Governance\nmissing", style=bold, color=red];
+
+    // The problem
+    problem [label="The Problem:\n\nHumans lose ability to:\n• Understand system behavior\n• Make informed decisions\n• Validate AI outputs\n• Govern effectively\n\nResult: Runaway dynamics",
+             shape=box, fillcolor=mistyrose, style="filled,bold", penwidth=2];
+
+    cluster_t200 -> problem;
+
+    // The solution
+    solution [label="Tensegrity Solution:\n\nActive Learning Primitives:\n\n1. Prediction Challenges\n   AI asks: \"What will this change do?\"\n   Human predicts → Outcome revealed\n   Learning occurs\n\n2. Comprehension Sampling\n   Randomly sample code sections\n   Human explains intent\n   Identify blind spots\n\n3. Experimental Sandbox\n   Safe environment to test hypotheses\n   Build intuition for system behavior\n\n4. Invariant Monitoring\n   When physics metrics spike:\n   Pause execution\n   Require human understanding\n   before proceeding",
+              shape=box, fillcolor=lightgreen, style="filled,bold", penwidth=2];
+
+    // Solution prevents divergence
+    cluster_t50 -> solution [label="Intervene\nearly", color=green, penwidth=3];
+    solution -> cluster_t200 [label="Prevents", style=dashed, color=green, dir=back];
+
+    // Outcome with governance
+    healthy [label="Maintained Sync:\n\n• Ground truth evolves\n• AI tracks changes\n• Humans stay aligned\n• Governance remains effective\n\nH stays moderate\nLearning force in equilibrium",
+             shape=ellipse, fillcolor=lightgreen, style=filled, penwidth=2];
+
+    solution -> healthy [penwidth=3, color=green];
+
+    label="\n\nKnowledge Representation Gap Over Time\n\nWithout active learning, human understanding decays → Governance fails\nWith active learning primitives, alignment is maintained";
+    labelloc=b;
+    fontsize=12;
+}

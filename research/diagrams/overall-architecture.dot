@@ -1,0 +1,68 @@
+digraph OverallArchitecture {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+
+    // Clusters
+    subgraph cluster_vision {
+        label="Tensegrity Vision\n(Layer 2: Governance)";
+        style=filled;
+        color=lightblue;
+
+        five_forces [label="Five Forces\n• Velocity\n• Quality\n• Coherence\n• Learning\n• Scope", shape=ellipse];
+        active_learning [label="Active Learning\nPrimitives"];
+        equilibrium [label="Equilibrium\nMonitoring"];
+        invariants [label="Invariant\nEnforcement"];
+
+        five_forces -> active_learning;
+        five_forces -> equilibrium;
+        five_forces -> invariants;
+    }
+
+    subgraph cluster_padai {
+        label="PadAI\n(Layer 1: Coordination)";
+        style=filled;
+        color=lightgreen;
+
+        task_coord [label="Task\nCoordination"];
+        agent_registry [label="Agent\nRegistry"];
+        observability [label="Real-time\nObservability"];
+
+        task_coord -> agent_registry;
+        task_coord -> observability;
+    }
+
+    subgraph cluster_physics {
+        label="Software Physics Research\n(Theoretical Foundation)";
+        style=filled;
+        color=lightyellow;
+
+        laplacian [label="Graph\nLaplacian\nL = D - A", shape=ellipse];
+        energies [label="Energies\nV_struct, V_bus\nT, H", shape=ellipse];
+        diagnostics [label="Diagnostics\nLocal E, gradients\nPhase space", shape=ellipse];
+
+        laplacian -> energies;
+        energies -> diagnostics;
+    }
+
+    // Connections between layers
+    five_forces -> task_coord [label="Uses for\ncoordination", style=dashed];
+    invariants -> diagnostics [label="Based on\nmetrics", style=dashed, color=blue];
+    equilibrium -> diagnostics [label="Monitors\nusing", style=dashed, color=blue];
+
+    // External
+    agents [label="AI Agents\n(Workers)", shape=component];
+    humans [label="Humans\n(Governance)", shape=component];
+    codebase [label="Codebase\n(Ground Truth)", shape=cylinder];
+
+    agents -> task_coord;
+    humans -> five_forces;
+    invariants -> codebase [label="Gates\nchanges to"];
+    observability -> humans [label="Dashboards\nfor"];
+
+    // Legend
+    {rank=same; laplacian; task_coord; five_forces;}
+
+    label="\n\nArchitecture: How PadAI, Tensegrity, and Software Physics Relate\n\nPadAI = Coordination (built)\nTensegrity = Governance (vision)\nSoftware Physics = Mathematical foundation for Tensegrity";
+    labelloc=b;
+    fontsize=12;
+}
